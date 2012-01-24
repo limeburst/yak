@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="alternate" type="application/atom+xml" href="{% block relative %}{% endblock %}atom.xml" />
+        <link rel="stylesheet" type="text/css" href="{{ self.relative() }}style.css" media="screen">
+        <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="{{ self.relative() }}">{{ blog.title }}</a></h1> by {{ blog.author }}
+        </div>
+        <div id="main">
+            {% block content %}{% endblock %}
+        </div>
+        <footer>
+            <p>{{ blog.rights }}</p>
+            <p>Site designed by <a href="http://limeburst.net/">LimeBurst</a>. Powered by <a href="http://yak.limelog.net/">Yak</a>.</p>
+        </footer>
+    </body>
+</html>

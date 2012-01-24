@@ -1,0 +1,37 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; font: inherit; vertical-align: baseline; } /* HTML5 display-role reset for older browsers */ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; } body { line-height: 1; } ol, ul { list-style: none; } blockquote, q { quotes: none; } blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; } table { border-collapse: collapse; border-spacing: 0; } 
+
+body { font-family: 'Bitter', serif;
+    line-height: 2em;
+    margin: 0 auto;
+    width: 640px;
+}
+
+#header { margin: 5em 0; }
+#header h1 { display: inline; font-size: 3em; }
+#header a { text-decoration: none; color: #30282A; }
+
+h2 { color: #30282A; font-size: 2em; }
+
+article, footer { margin: 3em 0; }
+footer a { color: #E84167; }
+header { margin-bottom: 0.5em; }
+header a { color: #30282A; text-decoration: none; }
+
+.permalink:before { content: " • "; color: #C4D4CB; }
+.permalink { color: #E84167; font-family: 'Georgia'; font-size: 1.3em; }
+
+article p { margin: 1em 0; }
+article p a { color: #E84167; }
+article em { font-style: italic; }
+article strong { font-weight: 700; }
+article ul, article ol, article blockquote { margin-left: 3em; }
+article ul a, article ol a { color: #E84167; }
+article ul { list-style-type: disc; }
+article ol { list-style-type: decimal; }
+article pre { font-family: 'Inconsolata', 'Menlo', 'Courier New'; }
+article img { max-width: 100%; text-align: center; }
+article sup { line-height: 0; vertical-align: super; }
+article:after { content: "◆"; color: #F4F4F4; display: block; font-size: 2em; margin-top: 1em;  text-align: center; }
+
+.archive h2 { margin: 1em 0; } 
+.archive a { color: #E84167; }

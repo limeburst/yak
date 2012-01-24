@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ blog.title }}{% endblock %}
+{% block relative %}./{% endblock %}
+
+{% block content %}
+{% for post in posts %}
+<article>
+    <header>
+    <h2><a href="{{ post.link }}">{{ post.title }}</a></h2>
+    <time datetime="{{ post.published }}" pubdate="pubdate">{{ post.long_published }}</time>
+    {% if not post.link == post.url %}
+    <a class="permalink" href="{{ post.url }}">∞</a>
+    {% endif %}
+    </header>
+    {{ post.content }}
+</article>
+{% endfor %}
+<div class="archive">
+    <h2>Archives</h2>
+    <ol>
+        {% for page in pages %}<li><a href="{{ page.url }}">{{ page.title }}</a></li>{% endfor %}
+    </ol>
+</div>
+{% endblock %}
