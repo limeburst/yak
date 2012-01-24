@@ -33,6 +33,7 @@ article pre { font-family: 'Inconsolata', 'Menlo', 'Courier New'; }
 article img { max-width: 100%; text-align: center; }
 article sup { line-height: 0; vertical-align: super; }
 article:after { content: "◆"; color: #F4F4F4; display: block; font-size: 2em; margin-top: 1em;  text-align: center; }
+article [controls] { margin: 1em 0; width: 100%; }
 
 .archive h2 { margin: 1em 0; } 
 .archive a { color: #E84167; }
