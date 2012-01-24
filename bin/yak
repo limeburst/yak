@@ -9,6 +9,9 @@ Use 'yak --build-base' to create a basic Yak blog structure in the current direc
 
 After running that command, be sure to edit the configuration file '_config.py' before baking your blog.
 """
+buildnotice = "Basic Yak blog structure has been created in the current working directory.
+
+Be sure to edit the '_config.py' configuration file before baking your blog."""
 
 def build_base():
     from pkgutil import get_data
@@ -24,7 +27,7 @@ def build_base():
     open('_templates/base.html', 'w').write(get_data('yak', 'data/base.html'))
     os.mkdir('_posts')
     open('_posts/2008-08-08-beijing-olympics.md', 'w').write(get_data('yak', 'data/2008-08-08-beijing-olympics.md'))
-    print "Basic Yak blog structure has been created in the current working directory. Be sure to edit the '_config.py' configuration file before baking your blog."
+    print buildnotice
 
 if len(sys.argv) == 3:
     main(sys.argv[1], sys.argv[2])
