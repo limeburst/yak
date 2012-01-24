@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='Yak',
-    version='0.1',
+    version='0.1.1',
     author='Jihyeok Seo',
     author_email='me@limeburst.net',
     url='http://yak.limelog.net/',

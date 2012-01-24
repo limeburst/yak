@@ -36,5 +36,5 @@ As of the current version, Yak will remove the contents of OUTPUT_DIR before wri
 Links
 `````
 
-* `The making of Yak <http://yak.limelog.net/>`_
-* `Author's homepage <http://limeburst.net/>`_
+* `The Making of Yak <http://yak.limelog.net/>`_
+* `Author's Homepage <http://limeburst.net/>`_
