@@ -6,9 +6,9 @@ from yak.writer import bake_blog
 
 import os
 import shutil
+import tempfile
 
 from datetime import datetime
-from random import random
 
 class Blog(object):
     """
@@ -47,11 +47,13 @@ def main(blogdir, outdir):
 
         updated = max(posts, key=lambda x: x.updated).updated
         blog = Blog(settings, updated)
-        tempdir = "/tmp/yak-{0}".format(random())
-        bake_blog(blog, posts, blogdir, tempdir)
+        tempdir = tempfile.mkdtemp()
+        tempout = os.path.join(tempdir, 'yak')
+        bake_blog(blog, posts, blogdir, tempout)
         if os.path.exists(outdir):
             shutil.rmtree(outdir)
-        shutil.move(tempdir, outdir)
+        shutil.move(tempout, outdir)
+        os.rmdir(tempdir)
 
         finish_time = datetime.now()
         timedelta = finish_time - start_time
