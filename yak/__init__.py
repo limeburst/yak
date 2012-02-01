@@ -24,6 +24,7 @@ class Blog(object):
             self.url = settings['BLOG_URL']
         else:
             self.url = settings['BLOG_URL'] + '/'
+        self.updated = updated
 
 def main(blogdir, outdir):
     # Is the bakery fully equipped?
