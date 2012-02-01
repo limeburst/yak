@@ -3,6 +3,12 @@ Yak Changelog
 
 Logging changes between PyPI Yak releases.
 
+Version 0.1.3
+-------------
+
+- Fixed ATOM updated datetime bug
+- Fixed minor bugs
+
 Version 0.1.2
 -------------
 
