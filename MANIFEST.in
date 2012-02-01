@@ -1,1 +1,2 @@
 include yak/data/*
+include README.rst
