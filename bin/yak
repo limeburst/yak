@@ -9,7 +9,7 @@ Use 'yak --build-base' to create a basic Yak blog structure in the current direc
 
 After running that command, be sure to edit the configuration file '_config.py' before baking your blog.
 """
-buildnotice = "Basic Yak blog structure has been created in the current working directory.
+buildnotice = """Basic Yak blog structure has been created in the current working directory.
 
 Be sure to edit the '_config.py' configuration file before baking your blog."""
 
