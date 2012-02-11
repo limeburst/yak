@@ -16,7 +16,7 @@
     {{ post.content }}
 </article>
 {% endfor %}
-<div class="archive">
+<div id="archive-list">
     <h2>Archives</h2>
     <ol>
         {% for page in pages %}<li><a href="{{ page.url }}">{{ page.title }}</a></li>{% endfor %}

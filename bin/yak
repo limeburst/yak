@@ -5,7 +5,7 @@ from yak import main
 
 miniman = """yak: Usage: yak [SOURCE_DIR] [OUTPUT_DIR]
 
-Use 'yak --build-base' to create a basic Yak blog structure in the current directory.
+Use 'yak init' to create a basic Yak blog structure in the current directory.
 
 After running that command, be sure to edit the configuration file '_config.py' before baking your blog.
 """
@@ -13,7 +13,7 @@ buildnotice = """Basic Yak blog structure has been created in the current workin
 
 Be sure to edit the '_config.py' configuration file before baking your blog."""
 
-def build_base():
+def init():
     from pkgutil import get_data
     open('_config.py', 'w').write(get_data('yak', 'data/_config.py'))
     os.mkdir('_static')
@@ -32,8 +32,8 @@ def build_base():
 if len(sys.argv) == 3:
     main(sys.argv[1], sys.argv[2])
 elif len(sys.argv) == 2:
-    if sys.argv[1] == '--build-base':
-        build_base()
+    if sys.argv[1] == 'init':
+        init()
     elif sys.argv[1] == '--help' or sys.argv[1] == '-h':
         print miniman
     else:

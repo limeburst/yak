@@ -30,10 +30,14 @@ def bake_blog(blog, posts, blogdir, outdir):
         soup = BeautifulSoup(post.content)
         images = soup.findAll('img')
         for image in images:
-            if not image['src'].startswith('http'):
+            if not image['src'].startswith('http://'):
                 if '/' in image['src']:
-                    os.makedirs(os.path.join(postdir, image['src'].rsplit('/', 1)[0]))
-                shutil.copyfile(os.path.join(post.root, image['src']), os.path.join(postdir, image['src']))
+                    os.makedirs(os.path.join(postdir, os.path.dirname(image['src'])))
+                try:
+                    shutil.copyfile(os.path.join(post.root, image['src']), os.path.join(postdir, image['src']))
+                except IOError:
+                    print "Image '{0}' not found for post '{1}'. Skipping post.".format(image['src'].encode('utf-8'), post.title.encode('utf-8'))
+                    continue
         f = open(os.path.join(postdir, 'index.html'), 'w', 'utf-8')
         f.write(template.render(blog=blog, post=post))
     

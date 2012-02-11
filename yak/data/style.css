@@ -35,5 +35,10 @@ article sup { line-height: 0; vertical-align: super; }
 article:after { content: "◆"; color: #F4F4F4; display: block; font-size: 2em; margin-top: 1em;  text-align: center; }
 article [controls] { margin: 1em 0; width: 100%; }
 
-.archive h2 { margin: 1em 0; } 
-.archive a { color: #E84167; }
+#archive h2 { margin: 1em 0; } 
+#archive a { color: #E84167; }
+
+#archive-list ol { -webkit-column-count:4; -moz-column-count: 3; column-count: 3; }
+#archive-list h2 { margin: 1em 0; } 
+#archive-list a { color: #E84167; }
+

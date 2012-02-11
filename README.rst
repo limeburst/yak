@@ -8,7 +8,7 @@ Quickstart
 
 To get started, run the following command::
     
-    yak --build-base
+    yak init
 
 And Yak will build a basic Yak blog structure with a single blog post in the current working directory. Edit the '_config.py' file to configure Yak.
 

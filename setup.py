@@ -2,14 +2,14 @@ from setuptools import setup
 
 setup(
     name='Yak',
-    version='0.1.3',
+    version='0.1.4',
     author='Jihyeok Seo',
     author_email='me@limeburst.net',
     url='http://yak.limelog.net/',
     description='A blog baking engine.',
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python',

@@ -11,14 +11,14 @@ class Post(object):
         Defines the properties of a post.
     """
     def __init__(self, root, title, content, published, long_published, updated, url, link):
-        self.root = root
+        self.root = root.decode('utf-8')
         self.title = title
         self.content = content
-        self.published = published
-        self.long_published = long_published
-        self.updated = updated
-        self.url = url
-        self.link = link
+        self.published = published.decode('utf-8')
+        self.long_published = long_published.decode('utf-8')
+        self.updated = updated.decode('utf-8')
+        self.url = url.decode('utf-8')
+        self.link = link.decode('utf-8')
 
 def get_posts(postdir):
     """

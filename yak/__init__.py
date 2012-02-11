@@ -36,15 +36,23 @@ def main(blogdir, outdir):
     settings = read_settings(os.path.join(blogdir, '_config.py'))
     print "Using the following settings:"
     for key in settings:
-        print key, '=', settings[key]
+        print key, '=', settings[key].encode('utf-8')
     print
 
+    read_started = datetime.now()
+    print "Reading started at {0}".format(read_started)
+
     posts = get_posts(os.path.join(blogdir, '_posts'))
+
+    read_finished = datetime.now()
+    print "Reading finished at {0}".format(read_finished)
+    print "The reading timer reads {0} seconds.\n".format((read_finished - read_started).seconds)
+
     if len(posts) == 0:
         print "No post found. Exiting."
     else:
-        start_time = datetime.now()
-        print "Baking started at {0}".format(start_time)
+        bake_started  = datetime.now()
+        print "Baking started at {0}".format(bake_started)
 
         updated = max(posts, key=lambda x: x.updated).updated
         blog = Blog(settings, updated)
@@ -56,7 +64,6 @@ def main(blogdir, outdir):
         shutil.move(tempout, outdir)
         os.rmdir(tempdir)
 
-        finish_time = datetime.now()
-        timedelta = finish_time - start_time
-        print "Baking finished at {0}".format(finish_time)
-        print "The oven timer reads {0} seconds.".format(timedelta.seconds)
+        bake_finished = datetime.now()
+        print "Baking finished at {0}".format(bake_finished)
+        print "The oven timer reads {0} seconds.".format((bake_finished - bake_started).seconds)
