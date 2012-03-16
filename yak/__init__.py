@@ -25,6 +25,8 @@ class Blog(object):
         else:
             self.url = settings['BLOG_URL'] + '/'
         self.updated = updated
+        self.maincount = settings['BLOG_MAINCOUNT']
+        self.atomcount = settings['BLOG_ATOMCOUNT']
 
 def main(blogdir, outdir):
     # Is the bakery fully equipped?
@@ -46,10 +48,12 @@ def main(blogdir, outdir):
 
     read_finished = datetime.now()
     print "Reading finished at {0}".format(read_finished)
-    print "The reading timer reads {0} seconds.\n".format((read_finished - read_started).seconds)
+    print "The reading timer reads {0} seconds.".format((read_finished - read_started).seconds)
+    print "Read {0} post(s).\n".format(len(posts))
 
     if len(posts) == 0:
         print "No post found. Exiting."
+        return False
     else:
         bake_started  = datetime.now()
         print "Baking started at {0}".format(bake_started)
@@ -67,3 +71,4 @@ def main(blogdir, outdir):
         bake_finished = datetime.now()
         print "Baking finished at {0}".format(bake_finished)
         print "The oven timer reads {0} seconds.".format((bake_finished - bake_started).seconds)
+        return (read_started, read_finished, bake_started, bake_finished)

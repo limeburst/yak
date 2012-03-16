@@ -10,3 +10,5 @@ BLOG_TITLE = u"A Yak Shaving Blog"
 BLOG_URL = u"http://example.com/"
 BLOG_RIGHTS = u"Copyright © 2008–2012 Yak Shaver."
 BLOG_SUBTITLE = u"Just another yak shaving blog."
+BLOG_MAINCOUNT = 20
+BLOG_ATOMCOUNT = 50

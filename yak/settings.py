@@ -7,6 +7,8 @@ DEFAULT_CONFIG = {
     'BLOG_URL': u"http://example.com/",
     'BLOG_RIGHTS': u"Copyright © 2012, Yak Shaver",
     'BLOG_SUBTITLE': u"A Yak Shaving Blog.",
+    'BLOG_MAINCOUNT': 20,
+    'BLOG_ATOMCOUNT': 50,
 }
 
 def read_settings(configfile):

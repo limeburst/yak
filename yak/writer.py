@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 from yak.reader import Post
@@ -65,7 +64,7 @@ def bake_blog(blog, posts, blogdir, outdir):
 
     # Render the front page
     template = env.get_template('index.html')
-    for post in posts[:20]:
+    for post in posts[:blog.maincount]:
         soup = BeautifulSoup(post.content)
         images = soup.findAll('img')
         for image in images:
@@ -73,7 +72,7 @@ def bake_blog(blog, posts, blogdir, outdir):
                 image['src'] = post.url + image['src']
         post.content = soup
     f = open(os.path.join(outdir, 'index.html'), 'w', 'utf-8')
-    f.write(template.render(blog=blog, posts=posts[:20], pages=pages))
+    f.write(template.render(blog=blog, posts=posts[:blog.maincount], pages=pages))
 
     # Ugh. Still generating archive pages.
     # This modifies the URLs to each archive pages.
@@ -87,4 +86,4 @@ def bake_blog(blog, posts, blogdir, outdir):
     # Render the ATOM feed
     template = env.get_template('atom.xml')
     f = open(os.path.join(outdir, 'atom.xml'), 'w', 'utf-8')
-    f.write(template.render(blog=blog, posts=posts))
+    f.write(template.render(blog=blog, posts=posts[:blog.atomcount]))

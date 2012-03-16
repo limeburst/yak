@@ -3,6 +3,11 @@ Yak Changelog
 
 Logging changes between PyPI Yak releases.
 
+Version 0.1.5
+-------------
+
+- More extensive configuration options for main page and ATOM post count
+
 Version 0.1.4
 -------------
 
