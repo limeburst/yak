@@ -11,12 +11,11 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    license='GPL',
     packages=['yak'],
     package_data={'yak': ['data/*']},
     install_requires=['Jinja2', 'Markdown', 'BeautifulSoup'],
