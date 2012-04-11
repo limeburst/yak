@@ -1,44 +1,66 @@
-#!/usr/bin/env python
-import sys
+#!/usr/bin/python
+
+import argparse
 import os
-from yak import main
 
-miniman = """yak: Usage: yak [SOURCE_DIR] [OUTPUT_DIR]
-
-Use 'yak init' to create a basic Yak blog structure in the current directory.
-
-After running that command, be sure to edit the configuration file '_config.py' before baking your blog.
-"""
-buildnotice = """Basic Yak blog structure has been created in the current working directory.
-
-Be sure to edit the '_config.py' configuration file before baking your blog."""
-
-def init():
+def init(args):
     from pkgutil import get_data
-    open('_config.py', 'w').write(get_data('yak', 'data/_config.py'))
-    os.mkdir('_static')
-    open('_static/style.css', 'w').write(get_data('yak', 'data/style.css'))
-    open('_static/favicon.ico', 'w').write(get_data('yak', 'data/favicon.ico'))
-    os.mkdir('_templates')
-    open('_templates/post.html', 'w').write(get_data('yak', 'data/post.html'))
-    open('_templates/atom.xml', 'w').write(get_data('yak', 'data/atom.xml'))
-    open('_templates/archive.html', 'w').write(get_data('yak', 'data/archive.html'))
-    open('_templates/index.html', 'w').write(get_data('yak', 'data/index.html'))
-    open('_templates/base.html', 'w').write(get_data('yak', 'data/base.html'))
-    os.mkdir('_posts')
-    open('_posts/2008-08-08-beijing-olympics.md', 'w').write(get_data('yak', 'data/2008-08-08-beijing-olympics.md'))
-    print buildnotice
 
-if len(sys.argv) == 3:
-    main(sys.argv[1], sys.argv[2])
-elif len(sys.argv) == 2:
-    if sys.argv[1] == 'init':
-        init()
-    elif sys.argv[1] == '--help' or sys.argv[1] == '-h':
-        print miniman
-    else:
-        main(sys.argv[1], sys.argv[1] + os.sep + '_site')
-elif len(sys.argv) == 1:
-    main(os.getcwd(), os.getcwd() + os.sep + '_site')
-else:
-    print miniman
+    root_files = ['_config.py']
+    static_files = ['style.css', 'favicon.ico']
+    template_files = ['post.html', 'atom.xml', 'archive.html', 'index.html', 'base.html']
+    post_files = ['2012-01-01-hello-world.md']
+
+    dirs = [
+            ('_static', static_files),
+            ('_templates', template_files),
+            ('_posts', post_files),
+            ] 
+
+    for file in root_files:
+        with open(os.path.join(args.dest, file), 'w') as f:
+            f.write(get_data('yak', os.path.join('data', file)))
+
+    for dir in dirs:
+        os.mkdir(os.path.join(args.dest, dir[0]))
+        for file in dir[1]:
+            with open(os.path.join(args.dest, dir[0], file), 'w') as f:
+                f.write(get_data('yak', os.path.join('data', file)))
+
+    print """Basic Yak blog structure has been created in '{}'.
+
+Be sure to edit the '_config.py' configuration file before baking your blog.""".format(args.dest)
+
+def bake(args):
+    print 'bake'
+
+def serve(args):
+    print 'serve'
+
+def watch(args):
+    print 'watch'
+
+parser = argparse.ArgumentParser(description="Yak makes baking and managing static blogs easy.")
+
+subparsers = parser.add_subparsers(help='sub-command help')
+
+parser_init = subparsers.add_parser('init', help='Initialize a basic Yak blog directory structucture.')
+parser_init.add_argument('dest', nargs='?', default='.')
+parser_init.set_defaults(func=init)
+
+parser_bake = subparsers.add_parser('bake', help='Bake the Yak blog.')
+parser_bake.add_argument('src', nargs='?', default='.')
+parser_bake.add_argument('dest', nargs='?', default='_site')
+parser_bake.set_defaults(func=bake)
+
+parser_serve = subparsers.add_parser('serve', help='Start the Yak blog management server.')
+parser_serve.add_argument('src', default='.')
+parser_serve.add_argument('-p', default=5000, type=int)
+parser_serve.set_defaults(func=serve)
+
+parser_watch = subparsers.add_parser('watch', help='Watch for changes in the posts directory.')
+parser_watch.add_argument('src', nargs='?', default='_posts')
+parser_watch.set_defaults(func=watch)
+
+args = parser.parse_args()
+args.func(args)
