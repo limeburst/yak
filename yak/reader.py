@@ -37,12 +37,12 @@ def get_posts(post_dir):
                 # Now get some real data
                 with open(os.path.join(root, filename), 'r', 'utf-8') as f:
                     content = md.convert(f.read())
-                    if not content: return None
+                    if not content: continue
 
                     # Get title
                     try:                    title = md.Meta['title'][0]
                     except KeyError:        title = slug
-                    except AttributeError:  return None
+                    except AttributeError:  continue
 
                     # Get published time
                     try:
@@ -71,10 +71,8 @@ def get_posts(post_dir):
 
                     # Get post and linked URL
                     url = datetime.strftime(published, "%Y/%m/%d/{}/".format(slug))
-                    try:
-                        link = md.Meta['link'][0]
-                    except KeyError:
-                        link = url
+                    try:                link = md.Meta['link'][0]
+                    except KeyError:    link = url
 
                 post = Post(root.decode('utf-8'), filename.decode('utf-8'), slug.decode('utf-8'),
                         title, content, url.decode('utf-8'), link.decode('utf-8'), published, updated)
