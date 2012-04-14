@@ -1,102 +1,82 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import datetime
 
 from codecs import open
 from markdown import Markdown
-from time import strftime, strptime
+
+md = Markdown(extensions=['extra', 'meta'])
 
 class Post(object):
-    """
-        Defines the properties of a post.
-    """
-    def __init__(self, root, title, content, published, long_published, updated, url, link):
-        self.root = root.decode('utf-8')
+    def __init__(self, root, filename, slug, title, content, url, link, published, updated):
+        self.root = root
+        self.filename = filename
+        self.slug = slug
         self.title = title
         self.content = content
-        self.published = published.decode('utf-8')
-        self.long_published = long_published.decode('utf-8')
-        self.updated = updated.decode('utf-8')
-        self.url = url.decode('utf-8')
-        self.link = link.decode('utf-8')
+        self.url = url
+        self.link = link
+        self.published = published
+        self.updated = updated
 
-def get_posts(postdir):
-    """
-        Returns a list of valid Post objects.
-        This function is quite chatty.
-    """
+def get_posts(post_dir):
     posts = []
-    for root, _, files in os.walk(postdir):
+    for root, _, files in os.walk(post_dir):
         for filename in files:
-            if filename.endswith(".md"):
-                # Validate the post slug and date
+            if filename.endswith('.md'):
+                # Find files with proper format. ex) 2012-01-01-hello-world.md
+                try:
+                    published = datetime.strptime(filename[:10], '%Y-%m-%d')
+                except ValueError:
+                    continue
                 slug = filename[11:-3]
                 if not slug:
-                    print "Invalid file (slug is not specified): {0}".format(filename)
-                    continue
-                try:
-                    date = strptime(filename[:10], "%Y-%m-%d")
-                except ValueError:
-                    print "Invalid file (incorrect date format): {0}".format(filename)
-                    continue
-            
-                f = open(os.path.join(root, filename), 'r', 'utf-8')
-                md = Markdown(extensions=['extra', 'meta'])
-                content = md.convert(f.read())
-
-                # Validate post content and get title
-                try:
-                    title = md.Meta['title'][0]
-                except KeyError:
-                    title = slug
-                except AttributeError:
-                    print "Invalid file (file is empty or dumb): {0}".format(filename)
                     continue
 
-                # Get published date and time
-                try:
-                    published = md.Meta['time'][0]
+                # Now get some real data
+                with open(os.path.join(root, filename), 'r', 'utf-8') as f:
+                    content = md.convert(f.read())
+                    if not content: return None
+
+                    # Get title
+                    try:                    title = md.Meta['title'][0]
+                    except KeyError:        title = slug
+                    except AttributeError:  return None
+
+                    # Get published time
                     try:
-                        published = strptime(published, "%H:%M:%S")
-                        published = strftime("T%H:%M:%SZ", published)
-                    except ValueError:
-                        print "Invalid published time format. Using default value for {0}".format(filename)
-                        published = "T00:00:00Z"
-                except KeyError:
-                    published = "T00:00:00Z"
-                published = strftime("%Y-%m-%d" + published, date)
-                long_published = strftime("%B %d, %Y", strptime(published, "%Y-%m-%dT%H:%M:%SZ"))
+                        time = datetime.strptime(md.Meta['time'][0], "%H:%M:%S")
+                    except (ValueError, KeyError):
+                        pass
+                    else:
+                        published = published.replace(
+                                hour=time.hour,
+                                minute=time.minute,
+                                second=time.second)
 
-                # Get updated date and time
-                # TODO: I know nested exception handling is bad!
-                try:
-                    updated = md.Meta['updated'][0]
+                    # Get updated datetime
                     try:
-                        updated = strptime(updated, "%H:%M:%S")
-                        updated = published[:10] + strftime("T%H:%M:%SZ", updated)
-                        if updated[11:-1] < published[11:-1]:
-                            print "Invalid updated time format. Using default value for {0}".format(filename)
-                            updated = published
-                    except ValueError:
+                        updated = md.Meta['updated'][0]
+                    except KeyError:
+                        updated = published
+                    else:
                         try:
-                            updated = strptime(updated, "%Y-%m-%d %H:%M:%S")
-                            updated = strftime("%Y-%m-%dT%H:%M:%SZ", updated)
+                            updated = datetime.strptime(updated, '%Y-%m-%d %H:%M:%S')
                         except ValueError:
-                            print "Invalid updated time format. Using default value for {0}".format(filename)
-                            updated = published
-                except KeyError:
-                    updated = published
-                    
-                # Get post and linked URL
-                url = strftime("%Y/%m/%d/{0}/".format(slug), date)
-                try:
-                    link = md.Meta['link'][0]
-                except KeyError:
-                    link = url
-                if content == "":
-                    print "Invalid file (file is empty or dumb): {0}".format(filename)
-                    continue
+                            try:
+                                updated = datetime.strptime(updated, '%H:%M:%S')
+                            except ValueError:
+                                updated = published
 
-                post = Post(root, title, content, published, long_published, updated, url, link)
+                    # Get post and linked URL
+                    url = datetime.strftime(published, "%Y/%m/%d/{}/".format(slug))
+                    try:
+                        link = md.Meta['link'][0]
+                    except KeyError:
+                        link = url
+
+                post = Post(root.decode('utf-8'), filename.decode('utf-8'), slug.decode('utf-8'),
+                        title, content, url.decode('utf-8'), link.decode('utf-8'), published, updated)
                 posts.append(post)
     return posts
