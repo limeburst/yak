@@ -5,10 +5,6 @@ SUBTITLE = u"Just another Yak blog"
 AUTHOR = u"Yak Shaver"
 EMAIL = u""                                 # Used in the ATOM feed. Not necessary.
 RIGHTS = u"Copyright © 2012 Yak Shaver."    # Used in the ATOM feed.
-
-ATOM_POST_COUNT = 20    # Number of articles to include in the ATOM file.
-MAIN_POST_COUNT = 20    # Number of articles to show on the blog main page.
-
 URL = u"http://example.com/"    # Used in the ATOM feed. Be sure to set this correctly.
                                 # Trailing slash does not matter.
 
