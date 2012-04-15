@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
 
-# Fill in your blog information here.
-# Except 'BLOG_EMAIL', all information is mandatory.
-# Be sure to set 'BLOG_URL' properly because it will be used when creating the atom feed. Trailing space does not matter.
+TITLE = u"Just another Yak blog"
+SUBTITLE = u"Just another Yak blog"
+AUTHOR = u"Yak Shaver"
+EMAIL = u""                                 # Used in the ATOM feed. Not necessary.
+RIGHTS = u"Copyright © 2012 Yak Shaver."    # Used in the ATOM feed.
 
-BLOG_AUTHOR = u"Yak Shaver"
-#BLOG_EMAIL = u"writes@example.com"
-BLOG_TITLE = u"A Yak Shaving Blog"
-BLOG_URL = u"http://example.com/"
-BLOG_RIGHTS = u"Copyright © 2008–2012 Yak Shaver."
-BLOG_SUBTITLE = u"Just another yak shaving blog."
-BLOG_MAINCOUNT = 20
-BLOG_ATOMCOUNT = 50
+ATOM_POST_COUNT = 20    # Number of articles to include in the ATOM file.
+MAIN_POST_COUNT = 20    # Number of articles to show on the blog main page.
+
+URL = u"http://example.com/"    # Used in the ATOM feed. Be sure to set this correctly.
+                                # Trailing slash does not matter.
+
+# The baked blog will end up here.
+# Yak will delete everything under this directory before baking the blog, so be careful.
+OUTPUT_DIRECTORY = u"_site"
+
+# Yak server settings for this blog.
+SERVER_PORT = 5000
+SERVER_USERNAME = u"yak"
+SERVER_PASSWORD = u"yak"
