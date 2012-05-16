@@ -7,7 +7,7 @@ Version 0.2
 -------------
 
 - Changed license to BSD
-- More extensive configuration options for main page and ATOM post count
+- Added web mangement server
 
 Version 0.1.4
 -------------

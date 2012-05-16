@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h3>Quick Post</h2>
+<form name="post" action="{{ url_for('posts') }}" method="POST">
+    <input type="text" name="filename" value="{{ filename }}"><br />
+    <textarea name="markdown" rows="10" cols="40">{{ markdown }}</textarea><br />
+    <input type="submit" name="draft" value="save as draft">
+    <input type="submit" name="publish" value="publish now">
+</form>
+{% endblock %}

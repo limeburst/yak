@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Edit Post{% endblock %}
+
+{% block content %}
+<form name="post" action="{{ url_for('posts') }}" method="POST">
+    <textarea name="markdown" rows="10" cols="40">{{ post.markdown }}</textarea><br />
+    <input type="submit" name="update" value="save">
+</form>
+<a href="{{ url_for('posts') }}">discard changes</a>
+{% endblock %}

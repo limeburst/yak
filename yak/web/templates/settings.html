@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<p>Current config:</p>
+<ul>
+    <li>Title: {{ blog.TITLE }}</li>
+    <li>Subtitle: {{ blog.SUBTITLE }}</li>
+    <li>Author: {{ blog.AUTHOR }}</li>
+    <li>Email: {{ blog.EMAIL }}</li>
+    <li>Rights: {{ blog.RIGHTS }}</li>
+    <li>Path: {{ blog.PATH }}</li>
+    <li>Baked Path: {{ blog.OUTPUT_DIRECTORY }}</li>
+    <li>URL: {{ blog.URL }}</li>
+</ul>
+<a href="/edit/config/">Edit Config</a>
+{% endblock %}

@@ -1,0 +1,8 @@
+html, textarea, input {
+    font-family: Menlo;
+}
+
+a, a:visited {
+    text-decoration: none;
+    text-color: blue;
+}

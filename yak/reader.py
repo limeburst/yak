@@ -23,8 +23,9 @@ class Post(object):
         self.updated_rfc3999 = datetime.strftime(self.updated, "%Y-%m-%dT%H:%M:%SZ")
 
 def read_settings(blog_dir):
-    tempdict = {}
+    from yak.writer import DEFAULT_CONFIG
     settings = DEFAULT_CONFIG.copy()
+    tempdict = {}
     try:
         execfile(os.path.join(blog_dir, '_config.py'), tempdict)
     except IOError:

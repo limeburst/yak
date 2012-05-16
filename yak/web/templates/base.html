@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" >
+        <title>{% block title %}{% endblock %} ‹ {{ blog.TITLE }}</title>
+        <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" >
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    </head>
+    <body>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        <h1>{{ blog.TITLE }}</h1>
+        <ul>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('posts') }}">Posts</a></li>
+            <li><a href="{{ url_for('media') }}">Media Library</a></li>
+            <li><a href="{{ url_for('settings') }}">Settings</a></li>
+        </ul>
+        <h2>{{ self.title() }}</h2>
+        {% block content %}{% endblock %}
+    </body>
+</html>
