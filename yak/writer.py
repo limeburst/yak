@@ -7,83 +7,114 @@ import shutil
 
 from BeautifulSoup import BeautifulSoup
 from codecs import open
-from jinja2 import Environment, FileSystemLoader
-from time import strftime, strptime
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader, Template
+from pkgutil import get_data
 
-def bake_blog(blog, posts, blogdir, outdir):
-    """
-        Bakes a blog from a list of Post objects.
-    """
-    # Prepare the bakery!
-    posts.sort(key=lambda x: x.published, reverse=True)
-    env = Environment(loader=FileSystemLoader(os.path.join(blogdir, '_templates')))
+DEFAULT_CONFIG = {
+        'TITLE': u"Just another Yak blog",
+        'SUBTITLE': u"Just another Yak blog",
+        'AUTHOR': u"Yak Blogger",
+        'EMAIL': u"",
+        'RIGHTS': u"Copyright © {} Yak Blogger".format(datetime.now().year),
+        'URL': u"http://example.com/",
+        'OUTPUT_DIRECTORY': u"_site",
+        'SERVER_PORT': 5000,
+        'SERVER_SECRET_KEY': os.urandom(16).encode('hex'),
+        'SERVER_USERNAME': u"yak",
+        'SERVER_PASSWORD': u"yak",
+        }
+
+def write_config(blog_dir, config=DEFAULT_CONFIG):
+    template = Template(get_data('yak', os.path.join('data', '_config.py')))
+    with open(os.path.join(blog_dir, '_config.py'), 'w', 'utf-8') as f:
+        f.write(template.render(blog=config))
+
+def bake(blog):
+    blog_dir = blog.settings['PATH']
+    out_dir = blog.settings['OUTPUT_DIRECTORY']
+    env = Environment(loader=FileSystemLoader(os.path.join(blog_dir, '_templates')))
 
     # Copy static files
-    shutil.copytree(os.path.join(blogdir, '_static'), outdir)
+    shutil.copytree(os.path.join(blog_dir, '_static'), out_dir)
 
-    # Make room, render each post and copy images
+    # Bake pages for each post
     template = env.get_template('post.html')
-    for post in posts:
-        postdir = os.path.join(outdir, post.url) # Always ends with an os.sep
-        os.makedirs(postdir)
-        soup = BeautifulSoup(post.content)
+    for post in blog.posts:
+        post_out_dir = os.path.join(out_dir, post.url.replace('/', os.sep))
+        os.makedirs(post_out_dir)
+        soup = BeautifulSoup(post.html)
+        images = soup.findAll('img')
+        for image in images:
+            if not image['src'].startswith("http://"):
+                img_dir = image['src'].replace('/', os.sep)
+                if '/' in image['src']:
+                    os.makedirs(os.path.join(post_out_dir, os.path.dirname(img_dir)))
+                try:
+                    shutil.copyfile(os.path.join(post.root, img_dir), os.path.join(post_out_dir, img_dir))
+                except IOError:
+                    continue
+        with open(os.path.join(post_out_dir, 'index.html'), 'w', 'utf-8') as f:
+            f.write(template.render(blog=blog.settings, post=post))
+
+    # Prepare the archives
+    yearly_archives, monthly_archives = {}, {}
+    yearly_archive_pages, monthly_archive_pages = [], []
+    blog.posts.sort(key=lambda x: x.published)
+    for post in blog.posts:
+        try:
+            yearly_archives[post.published.year].append(post)
+        except KeyError:
+            yearly_archives[post.published.year] = [post]
+            yearly_archive_pages.append({'url': post.url[:5], 'title': post.published.year})
+        try:
+            monthly_archives[post.published.replace(day=1, hour=0, minute=0, second=0)].append(post)
+        except KeyError:
+            monthly_archives[post.published.replace(day=1, hour=0, minute=0, second=0)] = [post]
+            monthly_archive_pages.append({'url': post.url[:8], 'title': datetime.strftime(post.published, "%b %Y")})
+    monthly_archive_pages.reverse()
+    yearly_archive_pages.reverse()
+
+    # Render the yearly archive pages
+    template = env.get_template('yearly_archive.html')
+    for key in yearly_archives:
+        archive_out_dir = os.path.join(out_dir, str(key), 'index.html')
+        with open(archive_out_dir, 'w', 'utf-8') as f:
+            f.write(template.render(
+                blog=blog.settings,
+                posts=yearly_archives[key],
+                archive_name=key,
+                pages=yearly_archive_pages)
+                )
+
+    # Render the monthly archive pages
+    template = env.get_template('monthly_archive.html')
+    for key in monthly_archives:
+        archive_out_dir = os.path.join(out_dir, str(key.year), str(key.month).rjust(2, '0'), 'index.html')
+        with open(archive_out_dir, 'w', 'utf-8') as f:
+            f.write(template.render(
+                blog=blog.settings,
+                posts=monthly_archives[key],
+                archive_name=datetime.strftime(key, "%B %Y"),
+                pages=monthly_archive_pages)
+                )
+
+    # Edit img src for the front page and the ATOM feed
+    for post in blog.posts:
+        soup = BeautifulSoup(post.html)
         images = soup.findAll('img')
         for image in images:
             if not image['src'].startswith('http://'):
-                if '/' in image['src']:
-                    os.makedirs(os.path.join(postdir, os.path.dirname(image['src'])))
-                try:
-                    shutil.copyfile(os.path.join(post.root, image['src']), os.path.join(postdir, image['src']))
-                except IOError:
-                    print "Image '{0}' not found for post '{1}'. Skipping post.".format(image['src'].encode('utf-8'), post.title.encode('utf-8'))
-                    continue
-        f = open(os.path.join(postdir, 'index.html'), 'w', 'utf-8')
-        f.write(template.render(blog=blog, post=post))
-    
-    # Render the archive pages. This doesn't end here!
-    # TODO: Can we do it more elegantly? God, those slicing!
-    pages=[]
-    archive = []
-    archives = []
-    posts.append(Post("", "", "", "", "", "", "", "19700101")) # Trick to minimize edge case code
-    for i, post in enumerate(posts):
-        if i == 0:
-            archive_date = post.published[:7]
-        if post.published[:7] == archive_date:
-            archive.append({'url': post.url[8:], 'title': post.title})
-            postd = post
-        else:
-            archive.reverse()
-            archives.append({'path': postd.url[:7], 'posts': archive[:], 'name': strftime("%B %Y", strptime(archive_date, "%Y-%m"))})
-            pages.append({'url': postd.url[:8], 'title': strftime("%b %Y", strptime(archive_date, "%Y-%m"))})
-            del archive[:]
-            archive_date = post.published[:7]
-            archive.append({'url': post.url[8:], 'title': post.title})
-            postd = post
-    posts.pop() # Un-trick
+                image['src'] = post.url + image['src']
+        post.html = soup
+
+    # Render the ATOM feed
+    blog.posts.reverse()
+    template = env.get_template('atom.xml')
+    with open(os.path.join(out_dir, 'atom.xml'), 'w', 'utf-8') as f:
+        f.write(template.render(blog=blog.settings, posts=blog.posts))
 
     # Render the front page
     template = env.get_template('index.html')
-    for post in posts[:blog.maincount]:
-        soup = BeautifulSoup(post.content)
-        images = soup.findAll('img')
-        for image in images:
-            if not image['src'].startswith('http'):
-                image['src'] = post.url + image['src']
-        post.content = soup
-    f = open(os.path.join(outdir, 'index.html'), 'w', 'utf-8')
-    f.write(template.render(blog=blog, posts=posts[:blog.maincount], pages=pages))
-
-    # Ugh. Still generating archive pages.
-    # This modifies the URLs to each archive pages.
-    template = env.get_template('archive.html')
-    for page in pages:
-        page['url'] = '../../' + page['url']
-    for archive in archives:
-        f = open(os.path.join(outdir, archive['path'], 'index.html'), 'w', 'utf-8')
-        f.write(template.render(blog=blog, posts=archive['posts'], archive_name=archive['name'], pages=pages))
-
-    # Render the ATOM feed
-    template = env.get_template('atom.xml')
-    f = open(os.path.join(outdir, 'atom.xml'), 'w', 'utf-8')
-    f.write(template.render(blog=blog, posts=posts[:blog.atomcount]))
+    with open(os.path.join(out_dir, 'index.html'), 'w', 'utf-8') as f:
+        f.write(template.render(blog=blog.settings, posts=blog.posts, months=monthly_archive_pages, years=yearly_archive_pages))
