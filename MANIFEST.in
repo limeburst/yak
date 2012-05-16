@@ -1,2 +1,4 @@
-include yak/data/*
+recursive-include yak/data *
+recursive-include yak/web/static *
+recursive-include yak/web/templates *
 include README.rst

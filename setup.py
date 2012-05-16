@@ -2,11 +2,11 @@ from setuptools import setup
 
 setup(
     name='Yak',
-    version='0.1.4',
+    version='0.2',
     author='Jihyeok Seo',
     author_email='me@limeburst.net',
     url='http://yak.limelog.net/',
-    description='A blog baking engine.',
+    description='A static blogging platform.',
     long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -16,8 +16,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    packages=['yak'],
-    package_data={'yak': ['data/*']},
-    install_requires=['Jinja2', 'Markdown', 'BeautifulSoup'],
+    packages=['yak', 'yak.web'],
+    package_data={'yak': ['data/*'], 'yak.web': ['templates/*', 'static/*']},
+    include_package_data=True,
+    install_requires=['Flask', 'Markdown', 'BeautifulSoup'],
     scripts=['bin/yak']
 )
