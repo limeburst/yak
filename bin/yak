@@ -10,8 +10,8 @@ def init(args):
 def bake(args):
     yak.bake(args.blog_dir)
 
-def serve(args):
-    yak.serve(args.blog_dir, args.p)
+def manage(args):
+    yak.manage(args.blog_dir, args.p)
 
 def watch(args):
     yak.watch(args.blog_dir)
@@ -28,10 +28,10 @@ parser_bake = subparsers.add_parser('bake', help="Bake the Yak blog.")
 parser_bake.add_argument('blog_dir', nargs='?', default='.')
 parser_bake.set_defaults(func=bake)
 
-parser_serve = subparsers.add_parser('serve', help="Start the Yak blog management server.")
+parser_serve = subparsers.add_parser('manage', help="Start the Yak blog management server.")
 parser_serve.add_argument('blog_dir', nargs='?', default='.')
 parser_serve.add_argument('-p', default=5000, type=int)
-parser_serve.set_defaults(func=serve)
+parser_serve.set_defaults(func=manage)
 
 parser_watch = subparsers.add_parser('watch', help="Watch for changes in the blog's posts directory.")
 parser_watch.add_argument('blog_dir', nargs='?', default='.')
