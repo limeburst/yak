@@ -1,25 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}{{ blog.title }}{% endblock %}
-{% block relative %}./{% endblock %}
-
+{% block title %}{{ blog.TITLE }}{% endblock %}
 {% block content %}
-{% for post in posts %}
+{% for post in posts[:20] %}
 <article>
     <header>
-    <h2><a href="{{ post.link }}">{{ post.title }}</a></h2>
-    <time datetime="{{ post.published }}" pubdate="pubdate">{{ post.long_published }}</time>
-    {% if not post.link == post.url %}
-    <a class="permalink" href="{{ post.url }}">∞</a>
-    {% endif %}
+        {% if post.link %}
+        <h1><a href="{{ post.link }}">{{ post.title }}</a></h1>
+        <time datetime="{{ post.published_rfc3999 }}" pubdate>{{ post.published_humanized }}</time>
+        <a href="{{ post.url }}" class="permalink">∞</a>
+        {% else %}
+        <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
+        <time datetime="{{ post.published_rfc3999 }}" pubdate>{{ post.published_humanized }}</time>
+        {% endif %}
     </header>
-    {{ post.content }}
+    {{ post.html }}
 </article>
 {% endfor %}
-<div id="archive-list">
-    <h2>Archives</h2>
+<nav>
+    <h1>Monthly Archives</h1>
     <ol>
-        {% for page in pages %}<li><a href="{{ page.url }}">{{ page.title }}</a></li>{% endfor %}
+        {% for month in months %}
+        <li><a href="{{ month.url }}">{{ month.title }}</a></li>
+        {% endfor %}
     </ol>
-</div>
+    <h1>Yearly Archives</h1>
+    <ol>
+        {% for year in years %}
+        <li><a href="{{ year.url }}">{{ year.title }}</a></li>
+        {% endfor %}
+    </ol>
+</nav>
 {% endblock %}

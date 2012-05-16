@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ archive_name }} &mdash; {{ blog.TITLE }}{% endblock %}
+{% block relative %}../../{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Archive for {{ archive_name }}</h2>
+    <ol>
+    {% for post in posts %}
+        <li>
+            <a href="{{ post.url[8:] }}">{{ post.title }}</a> &mdash;
+            {{ post.published_humanized[:-6] }}
+        </li>
+    {% endfor %}
+    </ol>
+</section>
+<nav>
+    <h2>Monthly Archives</h2>
+    <ol>
+    {% for page in pages %}
+        <li><a href="{{ self.relative() }}{{ page.url }}">{{ page.title }}</a></li>
+    {% endfor %}
+    </ol>
+</nav>
+{% endblock %}
