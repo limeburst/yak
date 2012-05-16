@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} &mdash; {{ blog.title }}{% endblock %}
+{% block relative %}../../../../{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+{% if not post.link == post.url %}
+    <h2><a href="{{ post.link }}">{{ post.title }}</a></h2>
+    <time datetime="{{ post.published }}" pubdate="pubdate">{{ post.long_published }}</time>
+    <a class="permalink" href=".">∞</a>
+{% else %}
+    <h2><a href=".">{{ post.title }}</a></h2>
+    <time datetime="{{ post.published }}" pubdate="pubdate">{{ post.long_published }}</time>
+{% endif %}
+    </header>
+    {{ post.content }}
+</article>
+{% endblock %}
