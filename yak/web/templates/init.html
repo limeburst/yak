@@ -1,36 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Settings{% endblock %}
+{% block title %}Set up a new Yak blog.{% endblock %}
+{% block navigation %}{% endblock %}
 
 {% block content %}
-<form method="POST" action="{{ url_for('settings') }}">
+<form method="POST" action="{{ url_for('init') }}">
     <h3>About this blog:</h3>
     <table>
         <tr>
             <th>Author</th>
-            <td><input name="AUTHOR" type="text" value="{{ blog.AUTHOR }}" /></td>
+            <td><input name="AUTHOR" type="text" size="40" value="{{ blog.AUTHOR }}" /></td>
         </tr>
         <tr>
             <th>Title</th>
-            <td><input name="TITLE" type="text" value="{{ blog.TITLE }}" /></td>
+            <td><input name="TITLE" type="text" size="40" value="{{ blog.TITLE }}" /></td>
         </tr>
         <tr>
             <th>Subtitle</th>
-            <td><input name="SUBTITLE" type="text" value="{{ blog.SUBTITLE }}" /></td>
+            <td><input name="SUBTITLE" type="text" size="40" value="{{ blog.SUBTITLE }}" /></td>
         </tr>
         <tr>
             <th>URL</th>
-            <td><input name="URL" type="text" value="{{ blog.URL }}" /></td>
+            <td><input name="URL" type="text" size="40" value="{{ blog.URL }}" /></td>
         </tr>
         <tr>
             <th>Rights</th>
-            <td><input name="RIGHTS" type="text" value="{{ blog.RIGHTS }}" /></td>
+            <td><input name="RIGHTS" type="text" size="40" value="{{ blog.RIGHTS }}" /></td>
         </tr>
     </table>
     <h3>This blog will be baked to:</h3>
     <table>
         <tr>
             <th>Output Directory</th>
-            <td><input name="OUTPUT_DIRECTORY" type="text" size="30" value="{{ blog.OUTPUT_DIRECTORY }}" /></td>
+            <td><input name="OUTPUT_DIRECTORY" type="text" size="20" value="{{ blog.OUTPUT_DIRECTORY }}" /></td>
         </tr>
     </table>
     <h3>Blog management server settings:</h3>

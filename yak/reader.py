@@ -22,23 +22,23 @@ class Post(object):
         self.updated = post['updated']
         self.updated_rfc3999 = datetime.strftime(self.updated, "%Y-%m-%dT%H:%M:%SZ")
 
-def read_settings(blog_dir):
-    from yak.writer import DEFAULT_CONFIG
-    settings = DEFAULT_CONFIG.copy()
+def read_config(blog_dir):
+    from yak import DEFAULT_CONFIG
+    config = DEFAULT_CONFIG.copy()
     tempdict = {}
     try:
         execfile(os.path.join(blog_dir, '_config.py'), tempdict)
     except IOError:
-        pass
+        return config
     else:
         for key in tempdict:
             if key.isupper():
-                settings[key] = tempdict[key]
-    if not settings['URL'].endswith('/'):
-        settings['URL'] += '/'
-    settings['PATH'] = os.path.abspath(blog_dir)
-    settings['OUTPUT_DIRECTORY'] = os.path.join(settings['PATH'], settings['OUTPUT_DIRECTORY'])
-    return settings
+                config[key] = tempdict[key]
+    if not config['URL'].endswith('/'):
+        config['URL'] += '/'
+    config['PATH'] = os.path.abspath(blog_dir)
+    config['OUTPUT_DIRECTORY'] = os.path.join(config['PATH'], config['OUTPUT_DIRECTORY'])
+    return config
 
 def get_posts(post_dir):
     """

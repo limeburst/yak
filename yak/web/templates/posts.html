@@ -3,48 +3,28 @@
 
 {% block content %}
 <ul>
-    <li><a href="/bake/">bake now!</a></li>
-    <li><a href="{{ url_for('posts') }}new/">add new</a></li>
+    <li><a href="/bake/">Bake Now!</a></li>
+    <li><a href="{{ url_for('posts') }}new/">Add New</a></li>
 </ul>
 <h3>Drafts</h3>
 {% if drafts %}
 <form action="/drafts/" method="POST">
 <select name="action" onchange="this.form.submit()">
-    <option value="-1" selected="selected">bulk actions</option>
-    <option value="draft">move to the oven</option>
-    <option value="trash">trash</option>
+    <option value="-1" selected="selected">Bulk Actions</option>
+    <option value="draft">Move to The Oven</option>
+    <option value="trash">Trash</option>
 </select>
 <noscript><input type="submit" name="apply" value="apply"></noscript>
 <table>
-     <tr>
-        <th></th>
-        <td>actions</td>
-        <td>filename</td>
-        <td>title</td>
-        <td>link</td>
-        <td>published</td>
-        <td>updated</td>
-    </tr>
     {%- for post in drafts -%}
     <tr>
         <th><input type="checkbox" name="drafts" value="{{ post.filename }}"></th>
-        <td>
-            <a href="{{ url_for('preview') }}">Preview</a>
+        <th>
             <a href="{{ url_for('edit_post', location='drafts', action='trash', filename=post.filename) }}">Trash</a>
-        </td>
+        </th>
         <td>
             <a href="{{ url_for('edit_post', location='drafts', action='edit', filename=post.filename) }}">{{ post.filename[:-3] }}</a>
         </td>
-        <td>{{ post.title }}</td>
-        <td>
-            {%- if post.link -%}
-                <a href="{{ post.link }}">{{ post.link }}</a>
-            {%- else -%}
-                None
-            {%- endif -%}
-        </td>
-        <td>{{ post.published }}</td>
-        <td>{{ post.updated }}</td>
     </tr>
     {%- endfor %}
 </table>
@@ -56,24 +36,18 @@
 {% if oven %}
 <form action="/oven/" method="POST">
 <select name="action" onchange="this.form.submit()">
-    <option value="-1" selected="selected">bulk actions</option>
-    <option value="draft">move to drafts</option>
-    <option value="trash">trash</option>
+    <option value="-1" selected="selected">Bulk Actions</option>
+    <option value="draft">Move to drafts</option>
+    <option value="trash">Trash</option>
 </select>
 <noscript><input type="submit" name="apply" value="apply"></noscript>
 <table>
-     <tr>
-        <th></th>
-        <td>actions</td>
-        <td>filename</td>
-    </tr>
     {%- for post in oven -%}
     <tr>
         <th><input type="checkbox" name="oven" value="{{ post.filename }}"></th>
-        <td>
-            <a href="{{ blog.URL }}{{ post.url }}">View</a>
+        <th>
             <a href="{{ url_for('edit_post', location='oven', action='trash', filename=post.filename) }}">Trash</a>
-        </td>
+        </th>
         <td>
             <a href="{{ url_for('edit_post', location='oven', action='edit', filename=post.filename) }}">{{ post.filename[:-3] }}</a>
         </td>

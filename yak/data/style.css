@@ -29,3 +29,8 @@ article:after, nav:after {
     display: block;
     text-align: center;
 }
+
+section ol, nav ol {
+    list-style: none;
+    padding-left: 0;
+}

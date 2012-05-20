@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from yak.reader import Post
+from yak import DEFAULT_CONFIG
 
 import os
 import shutil
@@ -11,28 +11,14 @@ from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, Template
 from pkgutil import get_data
 
-DEFAULT_CONFIG = {
-        'TITLE': u"Just another Yak blog",
-        'SUBTITLE': u"Just another Yak blog",
-        'AUTHOR': u"Yak Blogger",
-        'EMAIL': u"",
-        'RIGHTS': u"Copyright © {} Yak Blogger".format(datetime.now().year),
-        'URL': u"http://example.com/",
-        'OUTPUT_DIRECTORY': u"_site",
-        'SERVER_PORT': 5000,
-        'SERVER_SECRET_KEY': os.urandom(16).encode('hex'),
-        'SERVER_USERNAME': u"yak",
-        'SERVER_PASSWORD': u"yak",
-        }
-
 def write_config(blog_dir, config=DEFAULT_CONFIG):
     template = Template(get_data('yak', os.path.join('data', '_config.py')))
     with open(os.path.join(blog_dir, '_config.py'), 'w', 'utf-8') as f:
         f.write(template.render(blog=config))
 
 def bake(blog):
-    blog_dir = blog.settings['PATH']
-    out_dir = blog.settings['OUTPUT_DIRECTORY']
+    blog_dir = blog.config['PATH']
+    out_dir = blog.config['OUTPUT_DIRECTORY']
     env = Environment(loader=FileSystemLoader(os.path.join(blog_dir, '_templates')))
 
     # Copy static files
@@ -55,7 +41,7 @@ def bake(blog):
                 except IOError:
                     continue
         with open(os.path.join(post_out_dir, 'index.html'), 'w', 'utf-8') as f:
-            f.write(template.render(blog=blog.settings, post=post))
+            f.write(template.render(blog=blog.config, post=post))
 
     # Prepare the archives
     yearly_archives, monthly_archives = {}, {}
@@ -81,7 +67,7 @@ def bake(blog):
         archive_out_dir = os.path.join(out_dir, str(key), 'index.html')
         with open(archive_out_dir, 'w', 'utf-8') as f:
             f.write(template.render(
-                blog=blog.settings,
+                blog=blog.config,
                 posts=yearly_archives[key],
                 archive_name=key,
                 pages=yearly_archive_pages)
@@ -93,7 +79,7 @@ def bake(blog):
         archive_out_dir = os.path.join(out_dir, str(key.year), str(key.month).rjust(2, '0'), 'index.html')
         with open(archive_out_dir, 'w', 'utf-8') as f:
             f.write(template.render(
-                blog=blog.settings,
+                blog=blog.config,
                 posts=monthly_archives[key],
                 archive_name=datetime.strftime(key, "%B %Y"),
                 pages=monthly_archive_pages)
@@ -112,9 +98,9 @@ def bake(blog):
     blog.posts.reverse()
     template = env.get_template('atom.xml')
     with open(os.path.join(out_dir, 'atom.xml'), 'w', 'utf-8') as f:
-        f.write(template.render(blog=blog.settings, posts=blog.posts))
+        f.write(template.render(blog=blog.config, posts=blog.posts))
 
     # Render the front page
     template = env.get_template('index.html')
     with open(os.path.join(out_dir, 'index.html'), 'w', 'utf-8') as f:
-        f.write(template.render(blog=blog.settings, posts=blog.posts, months=monthly_archive_pages, years=yearly_archive_pages))
+        f.write(template.render(blog=blog.config, posts=blog.posts, months=monthly_archive_pages, years=yearly_archive_pages))

@@ -9,21 +9,16 @@
 </form>
 <h3>Recent Uploads</h3>
 <select name="action">
-    <option value="-1" selected="selected">bulk actions</option>
-    <option value="trash">trash</option>
+    <option value="-1" selected="selected">Bulk Actions</option>
+    <option value="trash">Trash</option>
 </select>
 <table>
-     <tr>
-        <th></th>
-        <td>actions</td>
-        <td>filename</td>
-    </tr>
     {%- for media in medialist[:50] -%}
     <tr>
         <th><input scope="row" type="checkbox" value="1"></th>
-        <td>
+        <th>
             <a href="{{ url_for('trash_media', filename=media.filename) }}">Trash</a>
-        </td>
+        </th>
         <td><a href="{{ url_for('media') }}{{ media.filename }}">{{ media.filename }}</a></td>
     </tr>
     {%- endfor %}
