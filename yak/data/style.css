@@ -20,7 +20,7 @@ body {
 }
 
 article sup { line-height: 0; vertical-align: super; }
-article img { max-width: 100%; text-align: center; }
+article img { max-width: 100%; display: block; margin: 0 auto; }
 article pre { overflow: auto; }
 article [controls] { width: 100%; } 
 article:after, nav:after {
