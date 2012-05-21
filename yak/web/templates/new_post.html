@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}New Post{% endblock %}
 
 {% block content %}
-<h3>Quick Post</h3>
+<h3>New Post</h3>
 <form name="post" action="{{ url_for('posts') }}" method="POST">
     <input type="text" name="filename" value="{{ filename }}"><br />
     <textarea name="markdown" rows="4">{{ markdown }}</textarea><br />
     <input type="submit" name="draft" value="save as draft">
-    <input type="submit" name="publish" value="publish now">
-    <input type="hidden" name="referer" value="dashboard">
+    <input type="submit" name="oven" value="save in the oven">
+    <input type="hidden" name="referer" value="new_post">
 </form>
 {% endblock %}

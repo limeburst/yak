@@ -109,10 +109,6 @@ h2 {
     font-weight: 700;
 }
 
-table tr, table td{
-    vertical-align: middle;
-}
-
 table th {
     padding-right: 1em;
     font-family: 'PT Mono';
@@ -120,6 +116,10 @@ table th {
 
 input[type=submit] {
     margin-top: 1em;
+}
+
+input[type=text] {
+    margin-bottom:1em;
 }
 
 select {

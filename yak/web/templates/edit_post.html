@@ -2,8 +2,9 @@
 {% block title %}Edit Post{% endblock %}
 
 {% block content %}
-<form name="post" action="{{ url_for('posts') }}" method="POST">
+<form name="post" action="{{ url_for('posts', action='edit') }}" method="POST">
     <textarea name="markdown" rows="10" cols="40">{{ post.markdown }}</textarea><br />
+    <input type="hidden" name="filename" value="{{ filename }}">
     <input type="submit" name="update" value="save">
 </form>
 {% endblock %}

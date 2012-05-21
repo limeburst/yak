@@ -40,11 +40,15 @@ def get_medialist(blog_dir):
 
 @app.route('/bake/')
 def bake():
-    from yak import bake
-    bake(blog_dir)
-    flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
     drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
     oven = get_postlist(os.path.join(blog_dir, '_oven'))
+    try:
+        from yak import bake
+        bake(blog_dir)
+    except ValueError:
+        flash(u"An error has occured. Maybe you don't have any posts in the oven?")
+        return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
+    flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
     return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
 
 @app.route('/init/', methods=['GET', 'POST'])
@@ -88,40 +92,70 @@ def posts():
     else:
         filename = request.form['filename']
         markdown = request.form['markdown']
+        referer = '{}.html'.format(request.form['referer'])
         for post in drafts:
             if post['filename'] == filename:
                 flash(u"A draft post with the same filename already exists.")
-                return render_template('dashboard.html', blog=config, filename=filename, markdown=markdown)
+                return render_template(referer, blog=config, filename=filename, markdown=markdown)
         for post in oven:
             if post['filename'] == filename:
                 flash(u"A post with the same filename already exists in the oven.")
-                return render_template('dashboard.html', blog=config, filename=filename, markdown=markdown)
+                return render_template(referer, blog=config, filename=filename, markdown=markdown)
         try:
             if request.form['draft']:
                 if is_valid_filename('', filename):
-                    with open(os.path.join(blog_dir, '_drafts', filename), 'w', 'utf-8') as f:
-                        f.write(request.form['markdown'])
+                    if is_valid_post(markdown, datetime.now()):
+                        with open(os.path.join(blog_dir, '_drafts', filename), 'w', 'utf-8') as f:
+                            f.write(markdown)
+                    else:
+                        flash(u"The post file is in an incorrect format. Missing 'Title: Post Title' ?")
+                        return render_template(referer, blog=config, filename=filename, markdown=markdown)
                     flash(u"The post '{}' has been saved.".format(filename))
                 else:
-                    flash(u"Invalid filename. e.g. YYYY-mm-dd-slug.md")
-                    return render_template('dashboard.html', blog=config, filename=filename, markdown=markdown)
+                    flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
+                    return render_template(referer, blog=config, filename=filename, markdown=markdown)
         except KeyError:
-            from yak import bake
-            if is_valid_filename('', filename):
-                with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
-                    f.write(request.form['markdown'])
-                flash(u"The post '{}' has been saved.".format(filename))
-            else:
-                flash(u"Invalid filename. e.g. YYYY-mm-dd-slug.md")
-                return render_template('dashboard.html', blog=config, filename=filename, markdown=markdown)
-            bake(blog_dir) 
-            flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
+            try:
+                if request.form['oven']:
+                    if is_valid_filename('', filename):
+                        if is_valid_post(markdown, datetime.now()):
+                            with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
+                                f.write(markdown)
+                        else:
+                            flash(u"The post file is in an incorrect format. Missing 'Title: Post Title' ?")
+                            return render_template(referer, blog=config, filename=filename, markdown=markdown)
+                        flash(u"The post '{}' has been saved.".format(filename))
+                    else:
+                        flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
+                        return render_template(referer, blog=config, filename=filename, markdown=markdown)
+
+            except KeyError:
+                from yak import bake
+                if is_valid_filename('', filename):
+                    with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
+                        f.write(markdown)
+                    flash(u"The post '{}' has been saved.".format(filename))
+                else:
+                    flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
+                    return render_template(referer, blog=config, filename=filename, markdown=markdown)
+                bake(blog_dir) 
+                flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
         drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
         oven = get_postlist(os.path.join(blog_dir, '_oven'))
         return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
 
+@app.route('/posts/new/')
+def new_post():
+    now = datetime.now()
+    date = datetime.strftime(now, "%Y-%m-%d")
+    time = datetime.strftime(now, "%H:%M:%S")
+
+    filename = u"{}-slug.md".format(date)
+    markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
+    return render_template('new_post.html', blog=config, filename=filename, markdown=markdown)
+
 @app.route('/posts/<string:location>/<string:action>/<string:filename>', methods=['GET', 'POST'])
-def edit_post(location, action, filename=None):
+def edit_post(location, action=None, filename=None):
     drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
     oven = get_postlist(os.path.join(blog_dir, '_oven'))
     if request.method == 'GET':
@@ -132,7 +166,7 @@ def edit_post(location, action, filename=None):
                     with open(os.path.join(post['root'], post['filename']), 'r', 'utf-8') as f:
                         markdown = f.read()
                     post = is_valid_post(markdown, post['published'])
-                    return render_template('edit_post.html', blog=config, post=post)
+                    return render_template('edit_post.html', blog=config, post=post, location=location, filename=filename)
             flash(u"The specified post '{}' could not be found.".format(filename))
             return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
         elif action == 'trash':
@@ -152,6 +186,14 @@ def edit_post(location, action, filename=None):
         else:
             return str(request.form.getlist('oven'))
 
+@app.errorhandler(400)
+def bad_request(e):
+    return u"Dude, what did you do? Bad request?"
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return u"That's not where you think you want to go, dude."
+
 @app.route('/media/', methods=['GET', 'POST'])
 def media():
     if request.method == 'GET':
@@ -161,10 +203,16 @@ def media():
         file = request.files['file']
         if file:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash(u"Uploaded file '{}'".format(file.filename))
-            medialist = get_medialist(blog_dir)
-            return render_template('media.html', blog=config, medialist=medialist)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(path):
+                flash(u"A file with the same name '{}' already exists.".format(filename))
+                medialist = get_medialist(blog_dir)
+                return render_template('media.html', blog=config, medialist=medialist)
+            else:
+                file.save(path)
+                flash(u"Uploaded file '{}'".format(file.filename))
+                medialist = get_medialist(blog_dir)
+                return render_template('media.html', blog=config, medialist=medialist)
         else:
             flash(u"Please select a file.")
             medialist = get_medialist(blog_dir)
@@ -186,7 +234,7 @@ def trash_media(filename=None):
             medialist = get_medialist(blog_dir)
             flash(u"Deleted file '{}'".format(filename))
             return render_template('media.html', blog=config, medialist=medialist)
-    flash(u"Cannot find specified file '{}'".format(filename))
+    flash(u"Cannot find the specified file '{}'".format(filename))
     return render_template('media.html', blog=config, medialist=medialist)
 
 @app.route('/preview/')

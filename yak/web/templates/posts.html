@@ -3,7 +3,7 @@
 
 {% block content %}
 <ul>
-    <li><a href="/bake/">Bake Now!</a></li>
+    <li><a href="{{ url_for('bake') }}">Bake Now</a></li>
     <li><a href="{{ url_for('posts') }}new/">Add New</a></li>
 </ul>
 <h3>Drafts</h3>
@@ -30,7 +30,7 @@
 </table>
 </form>
 {% else %}
-<p>There are no draft posts!</p>
+<p>There are no draft posts.</p>
 {% endif %}
 <h3>The Oven</h3>
 {% if oven %}
@@ -56,6 +56,6 @@
 </table>
 </form>
 {% else %}
-<p>There are no posts in the oven!</p>
+<p>There are no posts in the oven.</p>
 {% endif %}
 {% endblock %}
