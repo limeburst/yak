@@ -19,6 +19,6 @@ setup(
     packages=['yak', 'yak.web'],
     package_data={'yak': ['data/*'], 'yak.web': ['templates/*', 'static/*']},
     include_package_data=True,
-    install_requires=['Flask', 'Markdown', 'BeautifulSoup'],
+    install_requires=['Flask', 'Markdown', 'BeautifulSoup', 'hgapi'],
     scripts=['bin/yak']
 )

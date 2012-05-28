@@ -3,11 +3,10 @@
 
 {% block content %}
 <h3>New Post</h3>
-<form name="post" action="{{ url_for('posts') }}" method="POST">
-    <input type="text" name="filename" value="{{ filename }}"><br />
-    <textarea name="markdown" rows="4">{{ markdown }}</textarea><br />
-    <input type="submit" name="draft" value="save as draft">
-    <input type="submit" name="oven" value="save in the oven">
-    <input type="hidden" name="referer" value="new_post">
+<form action="{{ url_for('new') }}" method="POST">
+    <input type="text" name="filename" value="{{ filename }}">
+    <textarea name="markdown" rows="4">{{ markdown }}</textarea>
+    <input type="submit" name="action" value="save as draft">
+    <input type="submit" name="action" value="save in the oven">
 </form>
 {% endblock %}

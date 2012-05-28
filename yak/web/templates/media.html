@@ -10,14 +10,9 @@
 
 {% if medialist %}
 <h3>Recent Uploads</h3>
-<select name="action">
-    <option value="-1" selected="selected">Bulk Actions</option>
-    <option value="trash">Trash</option>
-</select>
 <table>
     {%- for media in medialist[:50] -%}
     <tr>
-        <th><input scope="row" type="checkbox" value="1"></th>
         <th>
             <a href="{{ url_for('trash_media', filename=media.filename) }}">Trash</a>
         </th>

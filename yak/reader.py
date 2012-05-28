@@ -94,7 +94,10 @@ def is_valid_post(markdown, published):
 
     # Get HTML data from markdown
     md = Markdown(extensions=['extra', 'meta'])
-    html = md.convert(markdown)
+    try:
+        html = md.convert(markdown)
+    except AttributeError:
+        return False
     if not html:
         return False
 

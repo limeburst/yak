@@ -1,9 +1,9 @@
 body {
     font-family: 'PT Serif';
-    max-width: 600px;
+    max-width: 640px;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 640px) {
     body {
         margin: 0 auto;
     }
@@ -20,7 +20,7 @@ body {
 }
 
 article sup { line-height: 0; vertical-align: super; }
-article img { max-width: 100%; display: block; margin: 0 auto; }
+article img, article iframe { max-width: 100%; display: block; margin: 1em auto; }
 article pre { overflow: auto; }
 article [controls] { width: 100%; } 
 article:after, nav:after {

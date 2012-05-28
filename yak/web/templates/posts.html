@@ -3,58 +3,38 @@
 
 {% block content %}
 <ul>
-    <li><a href="{{ url_for('bake') }}">Bake Now</a></li>
-    <li><a href="{{ url_for('posts') }}new/">Add New</a></li>
+    <li><a href="{{ url_for('bake_blog') }}">Bake Now</a></li>
+    <li><a href="{{ url_for('new') }}">Add New</a></li>
 </ul>
 <h3>Drafts</h3>
 {% if drafts %}
-<form action="/drafts/" method="POST">
-<select name="action" onchange="this.form.submit()">
-    <option value="-1" selected="selected">Bulk Actions</option>
-    <option value="draft">Move to The Oven</option>
-    <option value="trash">Trash</option>
-</select>
-<noscript><input type="submit" name="apply" value="apply"></noscript>
 <table>
     {%- for post in drafts -%}
     <tr>
-        <th><input type="checkbox" name="drafts" value="{{ post.filename }}"></th>
-        <th>
-            <a href="{{ url_for('edit_post', location='drafts', action='trash', filename=post.filename) }}">Trash</a>
-        </th>
+        <th><a href="{{ url_for('trash', name=post.filename) }}">Trash</a></th>
+        <th><a href="{{ url_for('move', name=post.filename) }}">Move</a></th>
         <td>
-            <a href="{{ url_for('edit_post', location='drafts', action='edit', filename=post.filename) }}">{{ post.filename[:-3] }}</a>
+            <a href="{{ url_for('edit', name=post.filename) }}">{{ post.filename[:-3] }}</a>
         </td>
     </tr>
     {%- endfor %}
 </table>
-</form>
 {% else %}
 <p>There are no draft posts.</p>
 {% endif %}
 <h3>The Oven</h3>
 {% if oven %}
-<form action="/oven/" method="POST">
-<select name="action" onchange="this.form.submit()">
-    <option value="-1" selected="selected">Bulk Actions</option>
-    <option value="draft">Move to drafts</option>
-    <option value="trash">Trash</option>
-</select>
-<noscript><input type="submit" name="apply" value="apply"></noscript>
 <table>
     {%- for post in oven -%}
     <tr>
-        <th><input type="checkbox" name="oven" value="{{ post.filename }}"></th>
-        <th>
-            <a href="{{ url_for('edit_post', location='oven', action='trash', filename=post.filename) }}">Trash</a>
-        </th>
+        <th><a href="{{ url_for('trash', name=post.filename) }}">Trash</a></th>
+        <th><a href="{{ url_for('move', name=post.filename) }}">Move</a></th>
         <td>
-            <a href="{{ url_for('edit_post', location='oven', action='edit', filename=post.filename) }}">{{ post.filename[:-3] }}</a>
+            <a href="{{ url_for('edit', name=post.filename) }}">{{ post.filename[:-3] }}</a>
         </td>
     </tr>
     {%- endfor %}
 </table>
-</form>
 {% else %}
 <p>There are no posts in the oven.</p>
 {% endif %}

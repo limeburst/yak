@@ -1,55 +1,75 @@
 import os
 import sys
+import hgapi
 
 from codecs import open
 from datetime import datetime
 from flask import Flask, render_template, request, flash, redirect, url_for, send_file
 from werkzeug import secure_filename
 
-from yak import DEFAULT_CONFIG
+from yak import bake, DEFAULT_CONFIG
 from yak.reader import read_config, get_postlist, is_valid_post, is_valid_filename
 from yak.web import app
+
+MSG_BLOG_BAKED = u"Your blog has been baked & updated @ {}"
+MSG_DUPLICATE_POST = u"A post with the same filename already exists."
+MSG_POST_NOT_FOUND = u"The specified post '{}' could not be found."
+MSG_POST_SAVED = u"The post '{}' has been saved."
+MSG_INVALID_FILENAME = u"Invalid filename. e.g., YYYY-mm-dd-slug.md"
+MSG_INVALID_POST = \
+        u"Post content is in an incorrect format. Missing 'Title: Post Title'?"
 
 blog_dir = app.config['APPLICATION_ROOT']
 config = read_config(blog_dir)
 app.secret_key = config['SERVER_SECRET_KEY']
 
-@app.route('/settings/', methods=['GET', 'POST'])
-def settings():
-    config = read_config(blog_dir)
-    if request.method == 'GET':
-        return render_template('settings.html', blog=config)
-    else:
-        for key in request.form:
-            if not request.form[key]:
-                flash(u"Please fill in all the fields")
-                return render_template('settings.html', blog=request.form)
-        from yak.writer import write_config
-        write_config(blog_dir, request.form)
-        flash(u"Settings saved.")
-        config = read_config(blog_dir)
-        return render_template('settings.html', blog=config)
+@app.errorhandler(400)
+def bad_request(e):
+    return u"Dude, what did you do? Bad request?"
+@app.errorhandler(404)
+def page_not_found(e):
+    return u"That's not where you think you want to go, dude."
 
-def get_medialist(blog_dir):
+def drafts():
+    return sorted(get_postlist(os.path.join(blog_dir, '_drafts')),
+            key=lambda k: k['filename'])
+def oven():
+    return sorted(get_postlist(os.path.join(blog_dir, '_oven')),
+            key=lambda k: k['filename'], reverse=True)
+
+def medialist():
     medialist = []
     for root, _, files in os.walk(os.path.join(blog_dir, '_oven')):
         for filename in files:
-            if not filename.endswith('.md'):
+            if not is_valid_filename('', filename):
                 medialist.append({'root': root, 'filename': filename})
     return medialist
 
-@app.route('/bake/')
-def bake():
-    drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
-    oven = get_postlist(os.path.join(blog_dir, '_oven'))
-    try:
-        from yak import bake
-        bake(blog_dir)
-    except ValueError:
-        flash(u"An error has occured. Maybe you don't have any posts in the oven?")
-        return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
-    flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
-    return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
+def default_post():
+    now = datetime.now()
+    date = datetime.strftime(now, "%Y-%m-%d")
+    time = datetime.strftime(now, "%H:%M:%S")
+    filename = u"{}-slug.md".format(date)
+    markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
+    return filename, markdown
+
+def get_post(filename):
+    for post in drafts():
+        if filename == post['filename']:
+            return post
+    for post in oven():
+        if filename == post['filename']:
+            return post
+    return False
+
+@app.route('/')
+def dashboard():
+    if not os.path.exists(blog_dir):
+        return redirect(url_for('init'))
+    else:
+        filename, markdown = default_post()
+        return render_template('dashboard.html', blog=config,
+                filename=filename, markdown=markdown)
 
 @app.route('/init/', methods=['GET', 'POST'])
 def init():
@@ -65,178 +85,211 @@ def init():
                 return render_template('init.html', blog=request.form)
         from yak import init
         init(blog_dir, request.form)
-        config = read_config(blog_dir)
         flash(u"Your Yak blog has been created. Happy blogging!")
-        return redirect(url_for('posts'))
-        
-@app.route('/')
-def dashboard():
-    if not os.path.exists(blog_dir):
-        return redirect(url_for('init'))
+        config = read_config(blog_dir)
+        filename, markdown = default_post()
+        return render_template('dashboard.html', blog=config,
+                filename=filename, markdown=markdown)
 
-    now = datetime.now()
-    date = datetime.strftime(now, "%Y-%m-%d")
-    time = datetime.strftime(now, "%H:%M:%S")
-
-    filename = u"{}-slug.md".format(date)
-    markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
-
-    return render_template('dashboard.html', blog=config, filename=filename, markdown=markdown)
-
-@app.route('/posts/', methods=['GET', 'POST'])
+@app.route('/posts/')
 def posts():
-    drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
-    oven = get_postlist(os.path.join(blog_dir, '_oven'))
+    return render_template('posts.html', blog=config,
+            drafts=drafts(), oven=oven())
+
+@app.route('/new/', methods=['GET', 'POST'])
+def new():
     if request.method == 'GET':
-        return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
+        filename, markdown = default_post()
+        return render_template('new_post.html',
+                blog=config, filename=filename, markdown=markdown)
     else:
         filename = request.form['filename']
         markdown = request.form['markdown']
-        referer = '{}.html'.format(request.form['referer'])
-        for post in drafts:
-            if post['filename'] == filename:
-                flash(u"A draft post with the same filename already exists.")
-                return render_template(referer, blog=config, filename=filename, markdown=markdown)
-        for post in oven:
-            if post['filename'] == filename:
-                flash(u"A post with the same filename already exists in the oven.")
-                return render_template(referer, blog=config, filename=filename, markdown=markdown)
-        try:
-            if request.form['draft']:
-                if is_valid_filename('', filename):
-                    if is_valid_post(markdown, datetime.now()):
-                        with open(os.path.join(blog_dir, '_drafts', filename), 'w', 'utf-8') as f:
-                            f.write(markdown)
-                    else:
-                        flash(u"The post file is in an incorrect format. Missing 'Title: Post Title' ?")
-                        return render_template(referer, blog=config, filename=filename, markdown=markdown)
-                    flash(u"The post '{}' has been saved.".format(filename))
-                else:
-                    flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
-                    return render_template(referer, blog=config, filename=filename, markdown=markdown)
-        except KeyError:
-            try:
-                if request.form['oven']:
-                    if is_valid_filename('', filename):
-                        if is_valid_post(markdown, datetime.now()):
-                            with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
-                                f.write(markdown)
-                        else:
-                            flash(u"The post file is in an incorrect format. Missing 'Title: Post Title' ?")
-                            return render_template(referer, blog=config, filename=filename, markdown=markdown)
-                        flash(u"The post '{}' has been saved.".format(filename))
-                    else:
-                        flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
-                        return render_template(referer, blog=config, filename=filename, markdown=markdown)
-
-            except KeyError:
-                from yak import bake
-                if is_valid_filename('', filename):
-                    with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
-                        f.write(markdown)
-                    flash(u"The post '{}' has been saved.".format(filename))
-                else:
-                    flash(u"Invalid filename. e.g., YYYY-mm-dd-slug.md")
-                    return render_template(referer, blog=config, filename=filename, markdown=markdown)
-                bake(blog_dir) 
-                flash(u"Your blog has been baked & updated @ {}".format(config['URL']))
-        drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
-        oven = get_postlist(os.path.join(blog_dir, '_oven'))
-        return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
-
-@app.route('/posts/new/')
-def new_post():
-    now = datetime.now()
-    date = datetime.strftime(now, "%Y-%m-%d")
-    time = datetime.strftime(now, "%H:%M:%S")
-
-    filename = u"{}-slug.md".format(date)
-    markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
-    return render_template('new_post.html', blog=config, filename=filename, markdown=markdown)
-
-@app.route('/posts/<string:location>/<string:action>/<string:filename>', methods=['GET', 'POST'])
-def edit_post(location, action=None, filename=None):
-    drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
-    oven = get_postlist(os.path.join(blog_dir, '_oven'))
-    if request.method == 'GET':
-        if action == 'edit':
-            posts = get_postlist(os.path.join(blog_dir, '_{}'.format(location)))
-            for post in posts:
-                if post['filename'] == filename:
-                    with open(os.path.join(post['root'], post['filename']), 'r', 'utf-8') as f:
-                        markdown = f.read()
-                    post = is_valid_post(markdown, post['published'])
-                    return render_template('edit_post.html', blog=config, post=post, location=location, filename=filename)
-            flash(u"The specified post '{}' could not be found.".format(filename))
-            return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
-        elif action == 'trash':
-            posts = get_postlist(os.path.join(blog_dir, '_{}'.format(location)))
-            for post in posts:
-                if post['filename'] == filename:
-                    os.remove(os.path.join(post['root'], post['filename']))
-                    flash(u"Deleted post '{}'.".format(filename))
-                    drafts = get_postlist(os.path.join(blog_dir, '_drafts'))
-                    oven = get_postlist(os.path.join(blog_dir, '_oven'))
-                    return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
-            flash(u"The specified post '{}' could not be found.".format(filename))
-            return render_template('posts.html', blog=config, drafts=drafts, oven=oven)
-    else:
-        if filename:
-            pass
+        action = request.form['action']
+        valid_filename = is_valid_filename('', filename)
+        if not valid_filename:
+            flash(MSG_INVALID_FILENAME)
+        elif get_post(filename):
+            flash(MSG_DUPLICATE_POST)
+        elif not is_valid_post(markdown, valid_filename['published']):
+            flash(MSG_INVALID_POST)
         else:
-            return str(request.form.getlist('oven'))
+            if 'draft' in action:
+                with open(os.path.join(blog_dir, '_drafts', filename),
+                        'w', 'utf-8') as f:
+                    f.write(markdown)
+            elif 'oven' in action:
+                with open(os.path.join(blog_dir, '_oven', filename),
+                        'w', 'utf-8') as f:
+                    f.write(markdown)
+            elif 'publish' in action:
+                with open(os.path.join(blog_dir, '_oven', filename),
+                        'w', 'utf-8') as f:
+                    f.write(markdown)
+                bake(blog_dir)
+                flash(MSG_BLOG_BAKED.format(config['URL']))
+            flash(MSG_POST_SAVED.format(filename))
+            return render_template('posts.html', blog=config,
+                    drafts=drafts(), oven=oven())
+        return render_template('dashboard.html', blog=config,
+                filename=filename, markdown=markdown)
 
-@app.errorhandler(400)
-def bad_request(e):
-    return u"Dude, what did you do? Bad request?"
+@app.route('/edit/<string:name>', methods=['GET', 'POST'])
+def edit(name=None):
+    if request.method == 'GET':
+        post = get_post(name)
+        if post:
+            filename = post['filename']
+            with open(os.path.join(post['root'], post['filename']),
+                    'r', 'utf-8') as f:
+                markdown = f.read()
+            if get_post(filename)['root'].endswith('_oven'):
+                action = 'save and publish'
+            else:
+                action = 'save'
+            return render_template('edit_post.html', blog=config,
+                    filename=filename, markdown=markdown, action=action)
+        else:
+            flash(MSG_POST_NOT_FOUND.format(name))
+            return render_template('posts.html', blog=config,
+                    drafts=drafts(), oven=oven())
+    else:
+        filename = request.form['filename']
+        markdown = request.form['markdown']
+        action = request.form['action']
+        if is_valid_filename('', filename):
+            if is_valid_post(markdown, datetime.now()):
+                post = get_post(name)
+                root = post['root']
+                if name == filename:
+                    with open(os.path.join(blog_dir, root, filename),
+                            'w', 'utf-8') as f:
+                        f.write(markdown)
+                    flash(MSG_POST_SAVED.format(filename))
+                    if 'publish' in action:
+                        bake(blog_dir)
+                        flash(MSG_BLOG_BAKED.format(config['URL']))
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return u"That's not where you think you want to go, dude."
+                    return render_template('posts.html', blog=config,
+                            drafts=drafts(), oven=oven())
+                else:
+                    if not get_post(filename):
+                        os.remove(os.path.join(blog_dir, root, name))
+                        with open(os.path.join(blog_dir, root, filename),
+                                'w', 'utf-8') as f:
+                            f.write(markdown)
+                        flash(u"Post {} has been renamed to {}".format(name, filename))
+                        flash(MSG_POST_SAVED.format(filename))
+                        if 'publish' in action:
+                            bake(blog_dir)
+                            flash(MSG_BLOG_BAKED.format(config['URL']))
+                        return render_template('posts.html', blog=config,
+                                drafts=drafts(), oven=oven())
+                    else:
+                        flash(MSG_DUPLICATE_POST)
+            else:
+                flash(MSG_INVALID_POST)
+        else:
+            flash(MSG_INVALID_FILENAME)
+        return render_template('edit_post.html', blog=config,
+                filename=name, markdown=markdown, action=action)
 
+def trash_post(filename):
+    post = get_post(filename)
+    if post:
+        os.remove(os.path.join(post['root'], post['filename']))
+        return True
+    return False
+
+@app.route('/trash/<string:name>', methods=['GET', 'POST'])
+def trash(name=None):
+    if request.method == 'GET':
+        if trash_post(name):
+            flash(u"Trashed post '{}'.".format(name))
+        else:
+            flash(u"The specified post '{}' could not be found.".format(name))
+        return render_template('posts.html', blog=config,
+                drafts=drafts(), oven=oven())
+    else:
+        return str(request.form)
+
+def move_post(post):
+    root = post['root']
+    name = post['filename']
+    with open(os.path.join(blog_dir, root, name), 'r', 'utf-8') as f:
+        markdown = f.read()
+    os.remove(os.path.join(blog_dir, root, name))
+    if root.endswith('_oven'):
+        with open(os.path.join(blog_dir, '_drafts', name), 'w', 'utf-8') as f:
+            f.write(markdown)
+        return 'drafts'
+    else:
+        with open(os.path.join(blog_dir, '_oven', name), 'w', 'utf-8') as f:
+            f.write(markdown)
+        return 'the oven'
+
+@app.route('/move/<string:name>', methods=['GET', 'POST'])
+def move(name):
+    post = get_post(name)
+    dest = move_post(post)
+    flash(u"Post {} has been moved to {}.".format(post['filename'], dest))
+    return render_template('posts.html', blog=config,
+            drafts=drafts(), oven=oven())
+
+@app.route('/bake/')
+def bake_blog():
+    try:
+        bake(blog_dir)
+    except ValueError:
+        flash(u"Baking failed! Maybe you don't have any posts in the oven?")
+    else:
+        flash(MSG_BLOG_BAKED.format(config['URL']))
+    return render_template('posts.html', blog=config,
+            drafts=drafts(), oven=oven())
+        
 @app.route('/media/', methods=['GET', 'POST'])
 def media():
-    if request.method == 'GET':
-        medialist = get_medialist(blog_dir)
-        return render_template('media.html', blog=config, medialist=medialist)
-    else:
+    if request.method == 'POST':
         file = request.files['file']
         if file:
             filename = secure_filename(file.filename)
             path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            if os.path.exists(path):
-                flash(u"A file with the same name '{}' already exists.".format(filename))
-                medialist = get_medialist(blog_dir)
-                return render_template('media.html', blog=config, medialist=medialist)
-            else:
+            if not os.path.exists(path):
                 file.save(path)
                 flash(u"Uploaded file '{}'".format(file.filename))
-                medialist = get_medialist(blog_dir)
-                return render_template('media.html', blog=config, medialist=medialist)
+            else:
+                flash(u"A file with the same name '{}' already exists.".format(filename))
         else:
             flash(u"Please select a file.")
-            medialist = get_medialist(blog_dir)
-            return render_template('media.html', blog=config, medialist=medialist)
+    return render_template('media.html', blog=config, medialist=medialist())
 
 @app.route('/media/<string:filename>')
 def send_media(filename):
-    medialist = get_medialist(blog_dir)
-    for media in medialist:
-        if media['filename'] == filename:
+    for media in medialist():
+        if filename == media['filename']:
             return send_file(os.path.join(blog_dir, '_oven', filename))
+    flash(u"File not found.")
+    return render_template('media.html', blog=config, medialist=medialist())
 
 @app.route('/media/trash/<string:filename>')
 def trash_media(filename=None):
-    medialist = get_medialist(blog_dir)
-    for media in medialist:
-        if media['filename'] == filename:
+    for media in medialist():
+        if filename == media['filename']:
             os.remove(os.path.join(media['root'], media['filename']))
-            medialist = get_medialist(blog_dir)
             flash(u"Deleted file '{}'".format(filename))
-            return render_template('media.html', blog=config, medialist=medialist)
+            return render_template('media.html', blog=config, medialist=medialist())
     flash(u"Cannot find the specified file '{}'".format(filename))
-    return render_template('media.html', blog=config, medialist=medialist)
+    return render_template('media.html', blog=config, medialist=medialist())
 
-@app.route('/preview/')
-def preview():
-    pass
+@app.route('/settings/', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'POST':
+        for key in request.form:
+            if not request.form[key]:
+                flash(u"Please fill in all the fields.")
+                return render_template('settings.html', blog=request.form)
+        from yak.writer import write_config
+        write_config(blog_dir, request.form)
+        flash(u"Settings saved.")
+    config = read_config(blog_dir)
+    return render_template('settings.html', blog=config)

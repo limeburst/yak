@@ -2,7 +2,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 body {
     font-family: 'PT Sans';
-    max-width: 600px;
+    max-width: 640px;
 }
 
 h2 {
@@ -22,7 +22,7 @@ section {
     padding: 1em;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 640px) {
     body {
         margin: 0 auto;
     }
@@ -89,7 +89,7 @@ footer p {
     margin-left: 1em;
 }
 
-table td, textarea, input {
+table td, textarea, input[type=password], input[type=text], input[type=submit] {
     background-color: yellow;
     font-family: 'PT Mono';
     box-sizing: border-box;
@@ -110,8 +110,9 @@ h2 {
 }
 
 table th {
-    padding-right: 1em;
+    padding-right: 0.5em;
     font-family: 'PT Mono';
+    font-size: 1em;
 }
 
 input[type=submit] {
