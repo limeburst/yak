@@ -37,15 +37,14 @@
     <table>
         <tr>
             <th>Username</th>
-            <td><input name="SERVER_USERNAME" type="text" size="30" value="{{ blog.SERVER_USERNAME }}" /></td>
+            <td><input name="USERNAME" type="text" size="30" value="{{ blog.USERNAME }}" /></td>
         </tr>
         <tr>
             <th>Password</th>
-            <td><input name="SERVER_PASSWORD" type="password" size="30" value="{{ blog.SERVER_PASSWORD }}" /></td>
+            <td><input name="PASSWORD" type="password" size="30" value="{{ blog.PASSWORD }}" /></td>
         </tr>
     </table>
-    <input name ="SERVER_PORT" type="hidden" value="{{ blog.SERVER_PORT }}" />
-    <input name ="SERVER_SECRET_KEY" type="hidden" value="{{ blog.SERVER_SECRET_KEY }}" />
+    <input name ="SECRET_KEY" type="hidden" value="{{ blog.SECRET_KEY }}" />
     <p><input type="submit" value="save" /></p>
 </form>
 {% endblock %}

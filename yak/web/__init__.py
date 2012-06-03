@@ -2,7 +2,7 @@ from flask import Flask
 app = Flask(__name__)
 
 def run_app(config):
-    for key in config:
-        app.config[key] = config[key]
+    app.config = dict(app.config.items() + config.items())
+    print app.config
     from yak.web import views
     app.run(host='0.0.0.0', port=app.config['PORT'])

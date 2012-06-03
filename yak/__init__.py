@@ -3,6 +3,7 @@
 import os
 
 from datetime import datetime
+from yak.reader import get_posts, read_config
 
 class Blog(object):
     def __init__(self, config, posts):
@@ -18,10 +19,9 @@ DEFAULT_CONFIG = {
         'RIGHTS': u"Copyright © {} Yak Blogger".format(datetime.now().year),
         'URL': u"http://example.com/",
         'OUTPUT_DIRECTORY': u"_site",
-        'SERVER_PORT': 5000,
-        'SERVER_SECRET_KEY': os.urandom(16).encode('hex'),
-        'SERVER_USERNAME': u"admin",
-        'SERVER_PASSWORD': u"",
+        'SECRET_KEY': os.urandom(16).encode('hex'),
+        'USERNAME': u"admin",
+        'PASSWORD': u"",
         }
 
 def init(blog_dir, config=DEFAULT_CONFIG):
@@ -67,15 +67,10 @@ def bake(blog_dir):
     import shutil
     import tempfile
 
-    from yak.reader import get_posts, read_config
     from yak.writer import bake
 
     # Read blog configuration file
     config = read_config(blog_dir)
-    print "Using the following settings:\n"
-    for key in config:
-        print key.ljust(20), ":", config[key]
-    print
 
     # Read blog posts
     read_started = datetime.now()
@@ -115,7 +110,7 @@ def bake(blog_dir):
 
 def manage(blog_dir, port):
     from yak.web import run_app
-    config = {}
+    config = read_config(blog_dir)
     config['APPLICATION_ROOT'] = os.path.abspath(blog_dir)
     config['UPLOAD_FOLDER'] = os.path.join(config['APPLICATION_ROOT'], '_oven')
     config['PORT'] = port

@@ -10,7 +10,6 @@ URL = u"{{ blog.URL }}" # Used in the ATOM feed. Be sure to set this correctly. 
 OUTPUT_DIRECTORY = u"{{ blog.OUTPUT_DIRECTORY }}"
 
 # Yak blog management server settings.
-SERVER_PORT = {{ blog.SERVER_PORT }}
-SERVER_SECRET_KEY = u"{{ blog.SERVER_SECRET_KEY }}"
-SERVER_USERNAME = u"{{ blog.SERVER_USERNAME }}"
-SERVER_PASSWORD = u"{{ blog.SERVER_PASSWORD }}"
+SECRET_KEY = u"{{ blog.SECRET_KEY }}"
+USERNAME = u"{{ blog.USERNAME }}"
+PASSWORD = u"{{ blog.PASSWORD }}"

@@ -40,15 +40,12 @@ a, a:visited {
 
 a:hover {
     color: white;
-    background: blue;
 }
 
 h2 {
-    background-color: pink;
 }
 
 section {
-    background-color: yellow;
 }
 
 h1 {
@@ -57,13 +54,11 @@ h1 {
     display: block;
     font-size: 1.5em;
     padding: 1em 0;
-    background-color: green;
 }
 
 nav {
     text-align: center;
     padding: 1em 0;
-    background-color: black;
 }
 
 nav li {
@@ -82,7 +77,6 @@ a, a:visited {
 
 footer {
     padding: 1em 0;
-    background-color: red;
 }
 
 footer p {
@@ -90,7 +84,6 @@ footer p {
 }
 
 table td, textarea, input[type=password], input[type=text], input[type=submit] {
-    background-color: yellow;
     font-family: 'PT Mono';
     box-sizing: border-box;
     width: 100%;
@@ -101,7 +94,6 @@ input[type=password], input[type=text], textarea {
 }
 
 body > ul {
-    background-color: red;
     padding: 1em;
 }
 
