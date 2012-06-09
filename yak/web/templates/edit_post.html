@@ -7,5 +7,5 @@
     <textarea name="markdown" rows="10" cols="40">{{ markdown }}</textarea><br />
     <input type="submit" name="action" value="{{ action }}">
 </form>
-<a href="{{ url_for('version', name=filename) }}">View previous versions of this post</a>
+<a href="{{ url_for('versions', name=filename) }}">View previous versions</a>
 {% endblock %}

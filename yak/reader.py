@@ -25,6 +25,7 @@ class Post(object):
 def read_config(blog_dir):
     from yak import DEFAULT_CONFIG
     config = DEFAULT_CONFIG.copy()
+    config['PATH'] = os.path.abspath(blog_dir)
     tempdict = {}
     try:
         execfile(os.path.join(blog_dir, '_config.py'), tempdict)
@@ -36,7 +37,6 @@ def read_config(blog_dir):
                 config[key] = tempdict[key]
     if not config['URL'].endswith('/'):
         config['URL'] += '/'
-    config['PATH'] = os.path.abspath(blog_dir)
     config['OUTPUT_DIRECTORY'] = os.path.join(config['PATH'], config['OUTPUT_DIRECTORY'])
     return config
 

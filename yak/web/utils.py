@@ -16,7 +16,7 @@ def default_post():
     markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
     return filename, markdown
  
-def trash_post(filename):
+def remove_post(filename):
     post = get_post(filename)
     if post:
         os.remove(os.path.join(post['root'], post['filename']))
@@ -50,9 +50,11 @@ def get_post(filename):
 def drafts():
     return sorted(get_postlist(os.path.join(blog_dir, '_drafts')),
             key=lambda k: k['filename'])
+
 def oven():
     return sorted(get_postlist(os.path.join(blog_dir, '_oven')),
             key=lambda k: k['filename'], reverse=True)
+
 def medialist():
     medialist = []
     for root, _, files in os.walk(os.path.join(blog_dir, '_oven')):
@@ -61,11 +63,20 @@ def medialist():
                 medialist.append({'root': root, 'filename': filename})
     return medialist
 
-def hg_trash(filename):
-    pass
-def hg_edit(filename):
-    pass
-def hg_move(filename):
-    pass
-def hg_new(filename):
-    pass
+def hg_init(blog_dir):
+    subprocess.call(['hg', 'init', blog_dir])
+
+def hg_add(filename):
+    post = get_post(filename)
+    subprocess.call(['hg', 'add', os.path.join(post['root'], filename)])
+    hg_commit(filename, 'new post')
+
+def hg_rename(source, target):
+    subprocess.call(['hg', 'rename', source, target])
+    hg_commit(target)
+
+def hg_commit(filename, message):
+    post = get_post(filename)
+    subprocess.call(['hg', 'commit', os.path.join(post['root'], filename),
+        '-u', app.config['AUTHOR'],
+        '-m', message])

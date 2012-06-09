@@ -21,7 +21,7 @@ DEFAULT_CONFIG = {
         'OUTPUT_DIRECTORY': u"_site",
         'SECRET_KEY': os.urandom(16).encode('hex'),
         'USERNAME': u"admin",
-        'PASSWORD': u"",
+        'PASSWORD': u"admin",
         }
 
 def init(blog_dir, config=DEFAULT_CONFIG):

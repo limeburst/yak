@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8" />
+        <meta charset="utf-8">
         <title>{% block title %}{% endblock %}</title>
-        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-        <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet'>
+        <!-- <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"> -->
+        <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet'>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     </head>
@@ -21,7 +21,6 @@
         </nav>
         {% endblock %}
         <h2>{{ self.title() }}</h2>
-
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul>
@@ -31,13 +30,11 @@
         </ul>
         {% endif %}
         {% endwith %}
-
         <section>
             {% block content %}{% endblock %}
         </section>
-
         <footer>
-        <p>Proudly Powered by <a href="http://yak.limelog.net/">Yak</a> and <a href="http://flask.pocoo.org/">Flask</a></p>
+            <p>Proudly Powered by <a href="http://yak.limelog.net/">Yak</a> and <a href="http://flask.pocoo.org/">Flask</a></p>
         </footer>
     </body>
 </html>
