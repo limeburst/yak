@@ -12,8 +12,9 @@ from yak import bake, DEFAULT_CONFIG
 from yak.reader import read_config, is_valid_post
 from yak.web import app
 from yak.web.utils import (
-        default_post, move_post, remove_post, get_location, is_valid_filename,
+        default_post, get_location, is_valid_filename,
         drafts, oven, medialist,
+        hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
         )
 from yak.writer import write_config
 
@@ -73,6 +74,11 @@ def init():
 
         from yak import init
         init(blog_dir, request.form)
+        hg_init(blog_dir)
+
+        hg_add('2012-01-01-howto-blog-using-yak.md')
+        hg_commit('2012-01-01-howto-blog-using-yak.md', 'new blog')
+
         config = read_config(blog_dir)
 
         flash(MSG_INIT_SUCCESS)
@@ -105,24 +111,30 @@ def new():
         else:
 
             if 'draft' in action:
+                dest = 'drafts'
                 with open(os.path.join(blog_dir, '_drafts', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
             elif 'oven' in action:
+                dest = 'the oven'
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
             elif 'publish' in action:
+                dest = 'the oven'
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-
                 bake(blog_dir)
                 flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
+
+            hg_add(filename)
+            hg_commit(filename, 'new post {} in {}'.format(filename, dest))
+
             flash(MSG_POST_SAVED.format(filename))
             return render_template('posts.html', blog=app.config,
                     drafts=drafts(), oven=oven())
-        return render_template('dashboard.html', blog=app.config,
+        return render_template(request.form['referer'], blog=app.config,
                 filename=filename, markdown=markdown)
 
 @app.route('/edit/<string:filename>', methods=['GET', 'POST'])
@@ -154,6 +166,7 @@ def edit(filename=None):
                     with open(os.path.join(blog_dir, location, filename),
                             'w', 'utf-8') as f:
                         f.write(markdown)
+                    hg_commit(filename, 'edited post')
                     flash(MSG_POST_SAVED.format(filename))
                     if 'publish' in action:
                         bake(blog_dir)
@@ -163,10 +176,16 @@ def edit(filename=None):
                 else:
                     # Filename changed
                     if not location:
+                        """
                         os.remove(os.path.join(blog_dir, location, filename))
+                        """
+
+                        hg_rename(filename, new_filename)
                         with open(os.path.join(blog_dir, location, new_filename),
                                 'w', 'utf-8') as f:
                             f.write(markdown)
+                        hg_commit(new_filename, 'renamed post')
+
                         flash(MSG_POST_RENAMED.format(filename, new_filename))
                         flash(MSG_POST_SAVED.format(new_filename))
                         if 'publish' in action:
@@ -189,7 +208,14 @@ def versions(name=None):
 
 @app.route('/remove/<string:filename>')
 def remove(filename):
-    if remove_post(filename):
+    location = get_location(filename)
+    if location:
+        hg_remove(filename)
+
+        # Mercurial deletes empty folders
+        if not os.path.exists(os.path.join(blog_dir, location)):
+            os.mkdir(os.path.join(blog_dir, location))
+
         flash(MSG_POST_REMOVED.format(filename))
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
@@ -198,8 +224,24 @@ def remove(filename):
 
 @app.route('/move/<string:filename>')
 def move(filename):
-    dest = move_post(filename)
-    if dest:
+    location = get_location(filename)
+    if location:
+        new_location = get_location(filename, True)
+        if new_location == '_oven':
+            dest = 'the oven'
+        elif new_location == '_drafts':
+            dest = 'drafts'
+
+        hg_move(
+                os.path.join(blog_dir, location, filename),
+                os.path.join(blog_dir, new_location, filename),
+                filename, dest
+                )
+
+        # Mercurial deletes empty folders
+        if not os.path.exists(os.path.join(blog_dir, location)):
+            os.mkdir(os.path.join(blog_dir, location))
+
         flash(MSG_POST_MOVED.format(filename, dest))
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))

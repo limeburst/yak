@@ -24,7 +24,6 @@ def postlist(post_dir):
     for filename in os.listdir(post_dir):
         if is_valid_filename(filename):
             postlist.append(filename)
-    print postlist
     return sorted(postlist)
 
 def medialist():
@@ -42,37 +41,19 @@ def default_post():
     markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
     return filename, markdown
  
-def remove_post(filename):
-    location = get_location(filename)
-    if location:
-        os.remove(os.path.join(blog_dir, location, filename))
-        return True
-    return False
-
-def move_post(filename):
-    location = get_location(filename)
-    if location:
-        with open(os.path.join(blog_dir, location, filename), 'r', 'utf-8') as f:
-            markdown = f.read()
-        os.remove(os.path.join(blog_dir, location, filename))
-        if location == '_oven':
-            with open(os.path.join(blog_dir, '_drafts', filename), 'w', 'utf-8') as f:
-                f.write(markdown)
-            return 'drafts'
-        elif location == '_drafts':
-            with open(os.path.join(blog_dir, '_oven', filename), 'w', 'utf-8') as f:
-                f.write(markdown)
-            return 'the oven'
-    else:
-        return False
-
-def get_location(filename):
+def get_location(filename, reverse=False):
     for post in drafts():
         if filename == post:
-            return '_drafts'
+            if not reverse:
+                return '_drafts'
+            else:
+                return '_oven'
     for post in oven():
         if filename == post:
-            return '_oven'
+            if not reverse:
+                return '_oven'
+            else:
+                return '_drafts'
     return False
 
 def drafts():
@@ -81,22 +62,41 @@ def drafts():
 def oven():
     return postlist(os.path.join(blog_dir, '_oven'))
 
+# TODO: Fix how Yak handles Mercurial commands
+# Use hg_commit only internally
+# Suppress using get_location. Explicit path!
+
 def hg_init(blog_dir):
     subprocess.call(['hg', 'init', blog_dir])
 
 def hg_add(filename):
-    post = get_post(filename)
-    subprocess.call(['hg', 'add', os.path.join(post['root'], filename)])
-    hg_commit(filename, 'new post')
+    location = get_location(filename)
+    subprocess.call(['hg', 'add', os.path.join(blog_dir, location, filename)])
 
 def hg_rename(source, target):
-    pass
+    subprocess.call(['hg', 'rename', source, target])
+
+def hg_move(source, target, filename, dest):
+    subprocess.call(['hg', 'rename', source, target])
+    subprocess.call([
+        'hg', 'commit', source, target,
+        '-u', app.config['AUTHOR'],
+        '-m', 'moved {} to {}'.format(filename, dest)]
+        )
 
 def hg_remove(filename):
-    pass
+    location = get_location(filename)
+    subprocess.call(['hg', 'remove', os.path.join(blog_dir, location, filename)])
+    subprocess.call([
+        'hg', 'commit', os.path.join(blog_dir, location, filename),
+        '-u', app.config['AUTHOR'],
+        '-m', 'deleted post {}'.format(filename)]
+        )
 
 def hg_commit(filename, message):
-    post = get_post(filename)
-    subprocess.call(['hg', 'commit', os.path.join(post['root'], filename),
+    location = get_location(filename)
+    subprocess.call([
+        'hg', 'commit', os.path.join(blog_dir, location, filename),
         '-u', app.config['AUTHOR'],
-        '-m', message])
+        '-m', message]
+        )

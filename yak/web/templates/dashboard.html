@@ -4,6 +4,7 @@
 {% block content %}
 <h3>Quick Post</h3>
 <form action="{{ url_for('new') }}" method="POST">
+    <input type="hidden" name="referer" value="dashboard.html">
     <input type="text" name="filename" value="{{ filename }}">
     <textarea name="markdown" rows="4">{{ markdown }}</textarea>
     <input type="submit" name="action" value="save as draft">
