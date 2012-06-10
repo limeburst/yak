@@ -2,7 +2,6 @@
 {% block title %}Posts{% endblock %}
 
 {% block content %}
-
 <ul>
     <li><a href="{{ url_for('bake_blog') }}">Bake Now</a></li>
     <li><a href="{{ url_for('new') }}">Add New</a></li>
@@ -10,12 +9,12 @@
 <h3>Drafts</h3>
 {% if drafts %}
 <table>
-    {%- for post in drafts -%}
+    {%- for filename in drafts -%}
     <tr>
-        <th><a href="{{ url_for('trash', name=post.filename) }}">Trash</a></th>
-        <th><a href="{{ url_for('move', name=post.filename) }}">Move</a></th>
+        <th><a href="{{ url_for('remove', filename=filename) }}">Trash</a></th>
+        <th><a href="{{ url_for('move', filename=filename) }}">Move</a></th>
         <td>
-            <a href="{{ url_for('edit', name=post.filename) }}">{{ post.filename[:-3] }}</a>
+            <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
         </td>
     </tr>
     {%- endfor %}
@@ -26,12 +25,12 @@
 <h3>The Oven</h3>
 {% if oven %}
 <table>
-    {%- for post in oven -%}
+    {%- for filename in oven -%}
     <tr>
-        <th><a href="{{ url_for('trash', name=post.filename) }}">Trash</a></th>
-        <th><a href="{{ url_for('move', name=post.filename) }}">Move</a></th>
+        <th><a href="{{ url_for('remove', filename=filename) }}">Trash</a></th>
+        <th><a href="{{ url_for('move', filename=filename) }}">Move</a></th>
         <td>
-            <a href="{{ url_for('edit', name=post.filename) }}">{{ post.filename[:-3] }}</a>
+            <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
         </td>
     </tr>
     {%- endfor %}

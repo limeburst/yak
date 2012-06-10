@@ -11,12 +11,12 @@
 {% if medialist %}
 <h3>Recent Uploads</h3>
 <table>
-    {%- for media in medialist[:50] -%}
+    {%- for filename in medialist[:50] -%}
     <tr>
         <th>
-            <a href="{{ url_for('trash_media', filename=media.filename) }}">Trash</a>
+            <a href="{{ url_for('remove_media', filename=filename) }}">Trash</a>
         </th>
-        <td><a href="{{ url_for('media') }}{{ media.filename }}">{{ media.filename }}</a></td>
+        <td><a href="{{ url_for('media') }}{{ filename }}">{{ filename }}</a></td>
     </tr>
     {%- endfor %}
 </table>

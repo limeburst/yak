@@ -9,13 +9,13 @@ from flask import Flask, render_template, request, flash, redirect, url_for, sen
 from werkzeug import secure_filename
 
 from yak import bake, DEFAULT_CONFIG
-from yak.reader import read_config, is_valid_post, is_valid_filename
+from yak.reader import read_config, is_valid_post
 from yak.web import app
 from yak.web.utils import (
-        default_post, move_post, remove_post, get_post,
+        default_post, move_post, remove_post, get_location, is_valid_filename,
         drafts, oven, medialist,
-        hg_add, hg_rename, hg_commit, hg_init
         )
+from yak.writer import write_config
 
 MSG_FILE_SAVED = u"Uploaded file '{}'"
 MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{}'"
@@ -73,8 +73,6 @@ def init():
 
         from yak import init
         init(blog_dir, request.form)
-        hg_init(blog_dir)
-        hg_add('2012-01-01-howto-blog-using-yak.md')
         config = read_config(blog_dir)
 
         flash(MSG_INIT_SUCCESS)
@@ -97,50 +95,45 @@ def new():
         filename = request.form['filename']
         markdown = request.form['markdown']
         action = request.form['action']
-        valid_filename = is_valid_filename('', filename)
+        valid_filename = is_valid_filename(filename)
         if not valid_filename:
             flash(MSG_POST_FILENAME_INVALID)
-        elif get_post(filename):
+        elif get_location(filename):
             flash(MSG_POST_EXISTS)
-        elif not is_valid_post(markdown, valid_filename['published']):
+        elif not is_valid_post(markdown, datetime.now()):
             flash(MSG_POST_CONTENT_INVALID)
         else:
+
             if 'draft' in action:
                 with open(os.path.join(blog_dir, '_drafts', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-                hg_commit(os.path.join(blog_dir, '_drafts', filename))
             elif 'oven' in action:
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-                hg_commit(os.path.join(blog_dir, '_oven', filename))
             elif 'publish' in action:
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-                hg_commit(os.path.join(blog_dir, '_oven', filename))
 
                 bake(blog_dir)
                 flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
-
             flash(MSG_POST_SAVED.format(filename))
             return render_template('posts.html', blog=app.config,
                     drafts=drafts(), oven=oven())
         return render_template('dashboard.html', blog=app.config,
                 filename=filename, markdown=markdown)
 
-@app.route('/edit/<string:name>', methods=['GET', 'POST'])
-def edit(name=None):
+@app.route('/edit/<string:filename>', methods=['GET', 'POST'])
+def edit(filename=None):
     if request.method == 'GET':
-        post = get_post(name)
-        if post:
-            filename = post['filename']
-            root = post['root']
-            with open(os.path.join(root, filename),
+        location = get_location(filename)
+        if location:
+            with open(os.path.join(blog_dir, location, filename),
                     'r', 'utf-8') as f:
                 markdown = f.read()
-            if get_post(filename)['root'].endswith('_oven'):
+            if location == '_oven':
                 action = 'save and publish'
             else:
                 action = 'save'
@@ -148,45 +141,37 @@ def edit(name=None):
                     filename=filename, markdown=markdown, action=action)
         else:
             flash(MSG_POST_NOT_FOUND.format(name))
-            return render_template('posts.html', blog=config,
+            return render_template('posts.html', blog=app.config,
                     drafts=drafts(), oven=oven())
     elif request.method == 'POST':
-        filename = request.form['filename']
+        new_filename = request.form['filename']
         markdown = request.form['markdown']
         action = request.form['action']
-        if is_valid_filename('', filename):
+        if is_valid_filename(filename):
             if is_valid_post(markdown, datetime.now()):
-                post = get_post(name)
-                root = post['root']
-                if name == filename:
-                    with open(os.path.join(blog_dir, root, filename),
+                location = get_location(filename)
+                if new_filename == filename:
+                    with open(os.path.join(blog_dir, location, filename),
                             'w', 'utf-8') as f:
                         f.write(markdown)
-                    hg_commit(filename)
                     flash(MSG_POST_SAVED.format(filename))
                     if 'publish' in action:
                         bake(blog_dir)
-                        flash(MSG_BAKE_SUCCESS.format(config['URL']))
-
+                        flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
                     return render_template('posts.html', blog=app.config,
                             drafts=drafts(), oven=oven())
                 else:
-                    if not get_post(filename):
-                        """
-                        os.remove(os.path.join(blog_dir, root, name))
-                        with open(os.path.join(blog_dir, root, filename),
+                    # Filename changed
+                    if not location:
+                        os.remove(os.path.join(blog_dir, location, filename))
+                        with open(os.path.join(blog_dir, location, new_filename),
                                 'w', 'utf-8') as f:
                             f.write(markdown)
-                        """
-                        hg_move(
-                                os.path.join(blog_dir, root, name),
-                                os.path.join(blog_dir, root, filename)
-                                )
-                        flash(MSG_POST_RENAMED.format(name, filename))
-                        flash(MSG_POST_SAVED.format(filename))
+                        flash(MSG_POST_RENAMED.format(filename, new_filename))
+                        flash(MSG_POST_SAVED.format(new_filename))
                         if 'publish' in action:
                             bake(blog_dir)
-                            flash(MSG_BAKE_SUCCESS.format(config['URL']))
+                            flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
                         return render_template('posts.html', blog=app.config,
                                 drafts=drafts(), oven=oven())
                     else:
@@ -202,21 +187,22 @@ def edit(name=None):
 def versions(name=None):
     pass
 
-@app.route('/remove/<string:name>')
-def trash(name=None):
-    if remove_post(name):
-        hg_remove(name)
-        flash(MSG_POST_REMOVED.format(name))
+@app.route('/remove/<string:filename>')
+def remove(filename):
+    if remove_post(filename):
+        flash(MSG_POST_REMOVED.format(filename))
     else:
-        flash(MSG_POST_NOT_FOUND.format(name))
+        flash(MSG_POST_NOT_FOUND.format(filename))
     return render_template('posts.html', blog=app.config,
             drafts=drafts(), oven=oven())
 
-@app.route('/move/<string:name>')
-def move(name):
-    post = get_post(name)
-    dest = move_post(post)
-    flash(MSG_POST_MOVED.format(post['filename'], dest))
+@app.route('/move/<string:filename>')
+def move(filename):
+    dest = move_post(filename)
+    if dest:
+        flash(MSG_POST_MOVED.format(filename, dest))
+    else:
+        flash(MSG_POST_NOT_FOUND.format(filename))
     return render_template('posts.html', blog=app.config,
             drafts=drafts(), oven=oven())
 
@@ -250,16 +236,16 @@ def media():
 @app.route('/media/<string:filename>')
 def send_media(filename):
     for media in medialist():
-        if filename == media['filename']:
+        if filename == media:
             return send_file(os.path.join(blog_dir, '_oven', filename))
     flash(MSG_FILE_NOT_FOUND)
     return render_template('media.html', blog=app.config, medialist=medialist())
 
-@app.route('/media/trash/<string:filename>')
-def trash_media(filename=None):
+@app.route('/media/remove/<string:filename>')
+def remove_media(filename=None):
     for media in medialist():
-        if filename == media['filename']:
-            os.remove(os.path.join(media['root'], media['filename']))
+        if filename == media:
+            os.remove(os.path.join(blog_dir, '_oven', filename))
             flash(MSG_FILE_DELETED.format(filename))
             return render_template('media.html', blog=app.config, medialist=medialist())
     flash(MSG_FILE_NOT_FOUND.format(filename))
@@ -272,7 +258,6 @@ def settings():
             if not request.form[key]:
                 flash(MSG_SETTINGS_FILL)
                 return render_template('settings.html', blog=request.form)
-        from yak.writer import write_config
         write_config(blog_dir, request.form)
         app.config = dict(app.config.items() + request.form.items())
         flash(MSG_SETTINGS_SAVED)
