@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Versions{% endblock %}
+
+{% block content %}
+<h3>Previous versions of post {{ filename }}</h3>
+{% if commits %}
+<table>
+    {%- for commit in commits -%}
+    <tr>
+        <th>{{ commit.date }}</th>
+        <td>{{ commit.changeset }}</td>
+        <td>{{ commit.summary }}</td>
+    <tr>
+    {%- endfor %}
+</table>
+{% else %}
+<p>There are no previous versions of this post.</p>
+{% endif %}
+{% endblock %}

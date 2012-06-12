@@ -75,14 +75,26 @@ def hg_add(filename):
 
 def hg_rename(source, target):
     subprocess.call(['hg', 'rename', source, target])
+    subprocess.call([
+        'hg', 'commit', source, target,
+        '-u', app.config['AUTHOR'],
+        '-m', 'renamed {} to {}'.format(
+            os.path.basename(source),
+            os.path.basename(target)
+            )
+        ])
+    if not os.path.exists(os.path.dirname(source)):
+        os.mkdir(os.path.dirname(source))
 
-def hg_move(source, target, filename, dest):
+def hg_move(source, target, dest):
     subprocess.call(['hg', 'rename', source, target])
     subprocess.call([
         'hg', 'commit', source, target,
         '-u', app.config['AUTHOR'],
-        '-m', 'moved {} to {}'.format(filename, dest)]
+        '-m', 'moved {} to {}'.format(os.path.basename(source), dest)]
         )
+    if not os.path.exists(os.path.dirname(source)):
+        os.mkdir(os.path.dirname(source))
 
 def hg_remove(filename):
     location = get_location(filename)
@@ -92,6 +104,8 @@ def hg_remove(filename):
         '-u', app.config['AUTHOR'],
         '-m', 'deleted post {}'.format(filename)]
         )
+    if not os.path.exists(os.path.join(blog_dir, location)):
+        os.mkdir(os.path.join(blog_dir, location))
 
 def hg_commit(filename, message):
     location = get_location(filename)

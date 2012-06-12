@@ -109,7 +109,6 @@ def new():
         elif not is_valid_post(markdown, datetime.now()):
             flash(MSG_POST_CONTENT_INVALID)
         else:
-
             if 'draft' in action:
                 dest = 'drafts'
                 with open(os.path.join(blog_dir, '_drafts', filename),
@@ -127,10 +126,8 @@ def new():
                     f.write(markdown)
                 bake(blog_dir)
                 flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
-
             hg_add(filename)
             hg_commit(filename, 'new post {} in {}'.format(filename, dest))
-
             flash(MSG_POST_SAVED.format(filename))
             return render_template('posts.html', blog=app.config,
                     drafts=drafts(), oven=oven())
@@ -159,14 +156,15 @@ def edit(filename=None):
         new_filename = request.form['filename']
         markdown = request.form['markdown']
         action = request.form['action']
-        if is_valid_filename(filename):
+        if is_valid_filename(new_filename):
             if is_valid_post(markdown, datetime.now()):
                 location = get_location(filename)
                 if new_filename == filename:
+                    # Filename did not change
                     with open(os.path.join(blog_dir, location, filename),
                             'w', 'utf-8') as f:
                         f.write(markdown)
-                    hg_commit(filename, 'edited post')
+                    hg_commit(filename, 'edited post {}'.format(filename))
                     flash(MSG_POST_SAVED.format(filename))
                     if 'publish' in action:
                         bake(blog_dir)
@@ -175,17 +173,14 @@ def edit(filename=None):
                             drafts=drafts(), oven=oven())
                 else:
                     # Filename changed
-                    if not location:
-                        """
-                        os.remove(os.path.join(blog_dir, location, filename))
-                        """
-
-                        hg_rename(filename, new_filename)
-                        with open(os.path.join(blog_dir, location, new_filename),
+                    if not get_location(new_filename):
+                        with open(os.path.join(blog_dir, location, filename),
                                 'w', 'utf-8') as f:
                             f.write(markdown)
-                        hg_commit(new_filename, 'renamed post')
-
+                        hg_rename(
+                                os.path.join(blog_dir, location, filename),
+                                os.path.join(blog_dir, location, new_filename)
+                                )
                         flash(MSG_POST_RENAMED.format(filename, new_filename))
                         flash(MSG_POST_SAVED.format(new_filename))
                         if 'publish' in action:
@@ -200,22 +195,33 @@ def edit(filename=None):
         else:
             flash(MSG_POST_FILENAME_INVALID)
         return render_template('edit_post.html', blog=app.config,
-                filename=name, markdown=markdown, action=action)
+                filename=new_filename, markdown=markdown, action=action)
 
-@app.route('/versions/<string:name>')
-def versions(name=None):
-    pass
+# Maybe not provide the versions view. Too cryptic for casual users.
+"""
+@app.route('/versions/<string:filename>')
+def versions(filename):
+    location = get_location(filename)
+    output = subprocess.check_output(['hg', 'log',
+        os.path.join(blog_dir, location, filename)])
+    commit = []
+    commits = []
+    for line in output.splitlines():
+        if line:
+            splitted = line.split(':', 1)
+            splitted[1] = splitted[1].strip()
+            commit.append(splitted)
+        else:
+            commits.append(dict(commit))
+            commit = []
+    return render_template('versions.html', blog=app.config, commits=commits)
+"""
 
 @app.route('/remove/<string:filename>')
 def remove(filename):
     location = get_location(filename)
     if location:
         hg_remove(filename)
-
-        # Mercurial deletes empty folders
-        if not os.path.exists(os.path.join(blog_dir, location)):
-            os.mkdir(os.path.join(blog_dir, location))
-
         flash(MSG_POST_REMOVED.format(filename))
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
@@ -227,21 +233,15 @@ def move(filename):
     location = get_location(filename)
     if location:
         new_location = get_location(filename, True)
-        if new_location == '_oven':
-            dest = 'the oven'
-        elif new_location == '_drafts':
+        if new_location == '_drafts':
             dest = 'drafts'
-
+        else:
+            dest = 'the oven'
         hg_move(
                 os.path.join(blog_dir, location, filename),
                 os.path.join(blog_dir, new_location, filename),
-                filename, dest
+                dest
                 )
-
-        # Mercurial deletes empty folders
-        if not os.path.exists(os.path.join(blog_dir, location)):
-            os.mkdir(os.path.join(blog_dir, location))
-
         flash(MSG_POST_MOVED.format(filename, dest))
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
