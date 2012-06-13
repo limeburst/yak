@@ -114,3 +114,26 @@ def hg_commit(filename, message):
         '-u', app.config['AUTHOR'],
         '-m', message]
         )
+
+def get_edit_commits(filename):
+    location = get_location(filename)
+
+    output = subprocess.check_output(['hg', 'log', '-f',
+        os.path.join(blog_dir, location, filename)])
+
+    commit = []
+    commits = []
+    for line in output.splitlines():
+        if line:
+            splitted = line.split(':', 1)
+            splitted[1] = splitted[1].strip()
+            commit.append(splitted)
+        else:
+            commits.append(dict(commit))
+            commit = []
+    edit_commits = []
+    for commit in commits:
+        if not 'moved' in commit['summary']:
+            edit_commits.append(commit)
+
+    return edit_commits

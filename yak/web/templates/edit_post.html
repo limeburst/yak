@@ -7,5 +7,10 @@
     <textarea name="markdown" rows="10" cols="40">{{ markdown }}</textarea><br />
     <input type="submit" name="action" value="{{ action }}">
 </form>
-<a href="{{ url_for('version', filename=filename) }}">View previous version</a>
+{% if past %}
+<a href="{{ url_for('edit_revision', filename=filename, revision=past) }}">View past version</a>
+{% endif %}
+{% if future %}
+<a href="{{ url_for('edit_revision', filename=filename, revision=future) }}">View future version</a>
+{% endif %}
 {% endblock %}

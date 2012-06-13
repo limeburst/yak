@@ -13,7 +13,7 @@ from yak.reader import read_config, is_valid_post
 from yak.web import app
 from yak.web.utils import (
         default_post, get_location, is_valid_filename,
-        drafts, oven, medialist,
+        drafts, oven, medialist, get_edit_commits,
         hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
         )
 from yak.writer import write_config
@@ -134,8 +134,44 @@ def new():
         return render_template(request.form['referer'], blog=app.config,
                 filename=filename, markdown=markdown)
 
+@app.route('/edit/<string:filename>/<string:revision>/')
+def edit_revision(filename, revision):
+    location = get_location(filename)
+    if location == '_oven':
+        action = 'save and publish'
+    else:
+        action = 'save'
+
+    edit_commits = get_edit_commits(filename)
+    print len(edit_commits)
+    for i, commit in enumerate(edit_commits):
+        if commit['changeset'].split(':')[1] == revision:
+            print i
+            try:
+                past = edit_commits[i+1]['changeset'].split(':')[1]
+            except IndexError:
+                past = None
+
+            try:
+                future = edit_commits[i-1]['changeset'].split(':')[1]
+            except IndexError:
+                future = None
+            if i == 0:
+                future = None
+
+    try:
+        markdown = subprocess.check_output(['hg', 'cat', '-r', revision,
+            os.path.join(blog_dir, location, filename)])
+    except subprocess.CalledProcessError:
+        location = get_location(filename, True)
+        markdown = subprocess.check_output(['hg', 'cat', '-r', revision,
+            os.path.join(blog_dir, location, filename)])
+    return render_template('edit_post.html', blog=app.config,
+            filename=filename, markdown=markdown, action=action,
+            past=past, future=future)
+
 @app.route('/edit/<string:filename>', methods=['GET', 'POST'])
-def edit(filename=None):
+def edit(filename):
     if request.method == 'GET':
         location = get_location(filename)
         if location:
@@ -146,8 +182,10 @@ def edit(filename=None):
                 action = 'save and publish'
             else:
                 action = 'save'
+            edit_commits = get_edit_commits(filename)
             return render_template('edit_post.html', blog=app.config,
-                    filename=filename, markdown=markdown, action=action)
+                    filename=filename, markdown=markdown, action=action,
+                    past=edit_commits[1]['changeset'].split(':')[1])
         else:
             flash(MSG_POST_NOT_FOUND.format(name))
             return render_template('posts.html', blog=app.config,
