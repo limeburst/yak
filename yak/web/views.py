@@ -13,7 +13,7 @@ from yak.reader import read_config, is_valid_post
 from yak.web import app
 from yak.web.utils import (
         default_post, get_location, is_valid_filename,
-        drafts, oven, medialist, get_edit_commits,
+        drafts, oven, medialist, get_edit_commits, get_commits,
         hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
         )
 from yak.writer import write_config
@@ -145,25 +145,33 @@ def edit_revision(filename, revision):
 
     edit_commits = get_edit_commits(filename)
     for i, commit in enumerate(edit_commits):
-        if commit['changeset'].split(':')[1] == revision:
+        if commit['node'] == revision:
             try:
-                past = edit_commits[i+1]['changeset'].split(':')[1]
+                past = edit_commits[i+1]['node']
             except IndexError:
                 past = None
             try:
-                future = edit_commits[i-1]['changeset'].split(':')[1]
+                future = edit_commits[i-1]['node']
             except IndexError:
                 future = None
             if i == 0:
                 future = None
 
-    try:
-        markdown = subprocess.check_output(['hg', 'cat', '-r', revision,
-            os.path.join(blog_dir, location, filename)])
-    except subprocess.CalledProcessError:
-        location = get_location(filename, True)
-        markdown = subprocess.check_output(['hg', 'cat', '-r', revision,
-            os.path.join(blog_dir, location, filename)])
+    for i, commit in enumerate(get_commits(filename)):
+        if commit['move']:
+            moved = commit['move'].split()[1][1:-1]
+        if commit['node'] == revision:
+            if commit['move']:
+                moved = commit['move'].split()[0]
+            break
+
+    if moved:
+        path = os.path.join(blog_dir, moved)
+    else:
+        path = os.path.join(blog_dir, get_location(filename), filename)
+
+    markdown = subprocess.check_output(['hg', 'cat', '-r', revision, path])
+
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,
             past=past, future=future)
@@ -182,7 +190,7 @@ def edit(filename):
                 action = 'save'
             edit_commits = get_edit_commits(filename)
             try:
-                past = edit_commits[1]['changeset'].split(':')[1]
+                past = edit_commits[1]['node']
             except IndexError:
                 past = None
             return render_template('edit_post.html', blog=app.config,

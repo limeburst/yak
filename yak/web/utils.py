@@ -116,24 +116,26 @@ def hg_commit(filename, message):
         )
 
 def get_edit_commits(filename):
+    commits = get_commits(filename)
+    edit_commits = []
+    for commit in commits:
+        if not 'moved' == commit['desc'].split()[0]:
+            edit_commits.append(commit)
+    return edit_commits
+
+def get_commits(filename):
     location = get_location(filename)
 
-    output = subprocess.check_output(['hg', 'log', '-f',
-        os.path.join(blog_dir, location, filename)])
+    output = subprocess.check_output(['hg', 'log',
+        '--template', 'node:{node}\ndesc:{desc}\nmove:{file_copies}\n\n',
+        '-f', os.path.join(blog_dir, location, filename)])
 
     commit = []
     commits = []
     for line in output.splitlines():
         if line:
-            splitted = line.split(':', 1)
-            splitted[1] = splitted[1].strip()
-            commit.append(splitted)
+            commit.append(line.split(':'))
         else:
             commits.append(dict(commit))
             commit = []
-    edit_commits = []
-    for commit in commits:
-        if not 'moved' in commit['summary']:
-            edit_commits.append(commit)
-
-    return edit_commits
+    return commits
