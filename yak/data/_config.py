@@ -8,8 +8,3 @@ URL = u"{{ blog.URL }}" # Used in the ATOM feed. Be sure to set this correctly. 
 
 # The baked blog will end up here.  Yak will delete everything under this directory before baking the blog, so be sure to set this correctly.
 OUTPUT_DIRECTORY = u"{{ blog.OUTPUT_DIRECTORY }}"
-
-# Yak blog management server settings.
-SECRET_KEY = u"{{ blog.SECRET_KEY }}"
-USERNAME = u"{{ blog.USERNAME }}"
-PASSWORD = u"{{ blog.PASSWORD }}"

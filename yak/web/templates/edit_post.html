@@ -8,9 +8,9 @@
     <input type="submit" name="action" value="{{ action }}">
 </form>
 {% if past %}
-<a href="{{ url_for('edit_revision', filename=filename, revision=past) }}">View past version</a>
+<a href="{{ url_for('edit_revision', filename=filename, revision=past) }}">Past</a>
 {% endif %}
 {% if future %}
-<a href="{{ url_for('edit_revision', filename=filename, revision=future) }}">View future version</a>
+<a href="{{ url_for('edit_revision', filename=filename, revision=future) }}">Future</a>
 {% endif %}
 {% endblock %}

@@ -1,120 +1,93 @@
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; font: inherit; vertical-align: baseline; } /* HTML5 display-role reset for older browsers */ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; } body { line-height: 1; } ol, ul { list-style: none; } blockquote, q { quotes: none; } blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; } table { border-collapse: collapse; border-spacing: 0; } 
 
+table th {
+    text-decoration: underline;
+    padding-right: 2em;
+}
+
+table td {
+    width: 100%;
+}
+
 body {
-    font-family: 'PT Serif';
+    font-family: 'Georgia';
+    background-image: url('http://subtlepatterns.com/patterns/lightpaperfibers.png');
     max-width: 640px;
-}
-
-h2 {
-    padding: 1em;
-}
-
-h3 {
-    padding: 1em 0;
-    font-weight: 700;
-}
-
-h3:first-child {
-    padding-top: 0;
-}
-
-section {
-    padding: 1em;
 }
 
 @media (min-width: 640px) {
     body {
         margin: 0 auto;
     }
-    h1 {
-        margin-top: 2em;
-    }
-    footer {
-        margin-bottom: 2em;
-    }
-}
-
-a, a:visited {
-    color: blue;
-}
-
-a:hover {
-    color: white;
-}
-
-h2 {
-}
-
-section {
 }
 
 h1 {
-    font-weight: 700;
+    font-size: 2em;
+}
+
+h3 {
+    margin: 0.5em 0;
+}
+
+section ol li {
+    padding: 0.3em 0;
+}
+
+section ul {
     text-align: center;
-    display: block;
-    font-size: 1.5em;
+}
+
+h1, nav, footer {
+    text-align: center;
+}
+
+h1, nav, footer, section {
     padding: 1em 0;
 }
 
-nav {
-    text-align: center;
-    padding: 1em 0;
-}
-
-nav li {
+nav li, section ul li {
     margin-left: 1em;
     display: inline;
 }
 
-nav li:last-child {
+nav li:last-child, section ul li:last-child {
     margin-right: 1em;
 }
 
-a, a:visited {
-    text-decoration: none;
-    text-color: blue;
-}
-
-footer {
-    padding: 1em 0;
-}
-
-footer p {
-    margin-left: 1em;
-}
-
-table td, textarea, input[type=password], input[type=text], input[type=submit] {
-    font-family: 'PT Mono';
-    box-sizing: border-box;
+textarea {
     width: 100%;
-}
-
-input[type=password], input[type=text], textarea {
-    border: none;
-}
-
-body > ul {
-    padding: 1em;
-}
-
-h2 {
-    font-weight: 700;
-}
-
-table th {
-    padding-right: 0.5em;
     font-family: 'PT Mono';
-    font-size: 1em;
 }
 
-input[type=submit] {
-    margin-top: 1em;
+input[type="text"] {
+    width: 100%;
+    font-family: 'PT Mono';
 }
 
-input[type=text] {
-    margin-bottom:1em;
+a:visited, a {
+    color: #21759B;
+    text-decoration: none;
 }
 
-select {
-    margin-bottom: 1em;
+section, h2, body>ul {
+    margin: 0.5em;
+}
+
+h3 {
+    font-size: 1.5em;
+}
+
+textarea, input {
+    box-sizing: border-box;
+}
+
+body>ul {
+    color: #333;
+}
+
+body>ul li {
+    padding: 0.5em;
+    border-radius: 0.5em;
+    margin: 0.5em 0;
+    background-color: #DFDFDF;
 }

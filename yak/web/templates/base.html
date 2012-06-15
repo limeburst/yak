@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8">
         <title>{% block title %}{% endblock %}</title>
-        <!-- <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"> -->
+        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
         <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet'>
+        <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     </head>
     <body>
@@ -20,7 +20,6 @@
             </ul>
         </nav>
         {% endblock %}
-        <h2>{{ self.title() }}</h2>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul>

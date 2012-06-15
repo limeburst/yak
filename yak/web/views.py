@@ -24,7 +24,7 @@ MSG_FILE_NOT_SELECTED = u"Please select a file."
 MSG_FILE_EXISTS = u"A file with the same name '{}' already exists."
 MSG_FILE_DELETED = u"Deleted file '{}'"
 
-MSG_SETTINGS_SAVED = u"Settings saved."
+MSG_SETTINGS_SAVED = u"Saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
 MSG_BAKE_FAILED = u"Baking failed! Maybe you don't have any posts in the oven?"
@@ -37,9 +37,9 @@ MSG_POST_EXISTS = u"A post with the same filename already exists."
 MSG_POST_FILENAME_INVALID = u"Invalid filename. e.g., YYYY-mm-dd-slug.md"
 MSG_POST_MOVED = u"Post {} has been moved to {}."
 MSG_POST_NOT_FOUND = u"The specified post '{}' could not be found."
-MSG_POST_REMOVED = u"Removed post '{}'."
+MSG_POST_REMOVED = u"Removed post {}."
 MSG_POST_RENAMED = u"Post {} has been renamed to {}"
-MSG_POST_SAVED = u"The post '{}' has been saved."
+MSG_POST_SAVED = u"The post {} has been saved."
 
 blog_dir = app.config['PATH']
 
@@ -79,7 +79,8 @@ def init():
         hg_add('2012-01-01-howto-blog-using-yak.md')
         hg_commit('2012-01-01-howto-blog-using-yak.md', 'new blog')
 
-        config = read_config(blog_dir)
+        app.config = dict(app.config.items() + request.form.items())
+        write_config(blog_dir, app.config)
 
         flash(MSG_INIT_SUCCESS)
         filename, markdown = default_post()
@@ -143,15 +144,12 @@ def edit_revision(filename, revision):
         action = 'save'
 
     edit_commits = get_edit_commits(filename)
-    print len(edit_commits)
     for i, commit in enumerate(edit_commits):
         if commit['changeset'].split(':')[1] == revision:
-            print i
             try:
                 past = edit_commits[i+1]['changeset'].split(':')[1]
             except IndexError:
                 past = None
-
             try:
                 future = edit_commits[i-1]['changeset'].split(':')[1]
             except IndexError:
@@ -183,9 +181,13 @@ def edit(filename):
             else:
                 action = 'save'
             edit_commits = get_edit_commits(filename)
+            try:
+                past = edit_commits[1]['changeset'].split(':')[1]
+            except IndexError:
+                past = None
             return render_template('edit_post.html', blog=app.config,
                     filename=filename, markdown=markdown, action=action,
-                    past=edit_commits[1]['changeset'].split(':')[1])
+                    past=past)
         else:
             flash(MSG_POST_NOT_FOUND.format(name))
             return render_template('posts.html', blog=app.config,
@@ -234,26 +236,6 @@ def edit(filename):
             flash(MSG_POST_FILENAME_INVALID)
         return render_template('edit_post.html', blog=app.config,
                 filename=new_filename, markdown=markdown, action=action)
-
-# Maybe not provide the versions view. Too cryptic for casual users.
-"""
-@app.route('/versions/<string:filename>')
-def versions(filename):
-    location = get_location(filename)
-    output = subprocess.check_output(['hg', 'log',
-        os.path.join(blog_dir, location, filename)])
-    commit = []
-    commits = []
-    for line in output.splitlines():
-        if line:
-            splitted = line.split(':', 1)
-            splitted[1] = splitted[1].strip()
-            commit.append(splitted)
-        else:
-            commits.append(dict(commit))
-            commit = []
-    return render_template('versions.html', blog=app.config, commits=commits)
-"""
 
 @app.route('/remove/<string:filename>')
 def remove(filename):
@@ -338,7 +320,7 @@ def settings():
             if not request.form[key]:
                 flash(MSG_SETTINGS_FILL)
                 return render_template('settings.html', blog=request.form)
-        write_config(blog_dir, request.form)
         app.config = dict(app.config.items() + request.form.items())
+        write_config(blog_dir, app.config)
         flash(MSG_SETTINGS_SAVED)
     return render_template('settings.html', blog=app.config)

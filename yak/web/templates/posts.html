@@ -8,33 +8,29 @@
 </ul>
 <h3>Drafts</h3>
 {% if drafts %}
-<table>
-    {%- for filename in drafts -%}
-    <tr>
-        <th><a href="{{ url_for('remove', filename=filename) }}">Trash</a></th>
-        <th><a href="{{ url_for('move', filename=filename) }}">Move</a></th>
-        <td>
-            <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
-        </td>
-    </tr>
-    {%- endfor %}
-</table>
+<ol>
+{%- for filename in drafts -%}
+    <li>
+        <a href="{{ url_for('remove', filename=filename) }}">X</a>
+        <a href="{{ url_for('move', filename=filename) }}">M</a>
+        <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
+    </li>
+{%- endfor %}
+</ol>
 {% else %}
 <p>There are no draft posts.</p>
 {% endif %}
 <h3>The Oven</h3>
 {% if oven %}
-<table>
-    {%- for filename in oven -%}
-    <tr>
-        <th><a href="{{ url_for('remove', filename=filename) }}">Trash</a></th>
-        <th><a href="{{ url_for('move', filename=filename) }}">Move</a></th>
-        <td>
-            <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
-        </td>
-    </tr>
-    {%- endfor %}
-</table>
+<ol>
+{%- for filename in oven -%}
+    <li>
+        <a href="{{ url_for('remove', filename=filename) }}">X</a>
+        <a href="{{ url_for('move', filename=filename) }}">M</a>
+        <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
+    </li>
+{%- endfor %}
+</ol>
 {% else %}
 <p>There are no posts in the oven.</p>
 {% endif %}

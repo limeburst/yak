@@ -3,6 +3,7 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
+<h2>{{ self.title() }}</h2>
 <form method="POST" action="{{ url_for('init') }}">
     <h3>About this blog:</h3>
     <table>
@@ -28,24 +29,7 @@
         </tr>
     </table>
     <h3>This blog will be baked to:</h3>
-    <table>
-        <tr>
-            <th>Output Directory</th>
-            <td><input name="OUTPUT_DIRECTORY" type="text" size="20" value="{{ blog.OUTPUT_DIRECTORY }}" /></td>
-        </tr>
-    </table>
-    <h3>Blog management server settings:</h3>
-    <table>
-        <tr>
-            <th>Username</th>
-            <td><input name="USERNAME" type="text" size="30" value="{{ blog.USERNAME }}" /></td>
-        </tr>
-        <tr>
-            <th>Password</th>
-            <td><input name="PASSWORD" type="password" size="30" value="{{ blog.PASSWORD }}" /></td>
-        </tr>
-    </table>
-    <input name ="SECRET_KEY" type="hidden" value="{{ blog.SECRET_KEY }}" />
+    <input name="OUTPUT_DIRECTORY" type="text" size="20" value="{{ blog.OUTPUT_DIRECTORY }}" />
     <p><input type="submit" value="Save" /></p>
 </form>
 {% endblock %}

@@ -7,7 +7,9 @@
     <input type="hidden" name="referer" value="dashboard.html">
     <input type="text" name="filename" value="{{ filename }}">
     <textarea name="markdown" rows="4">{{ markdown }}</textarea>
-    <input type="submit" name="action" value="save as draft">
-    <input type="submit" name="action" value="publish now">
+    <ul>
+        <li><input type="submit" name="action" value="save as draft"></li>
+        <li><input type="submit" name="action" value="publish now"></li>
+    </ul>
 </form>
 {% endblock %}

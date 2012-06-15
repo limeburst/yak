@@ -19,9 +19,6 @@ DEFAULT_CONFIG = {
         'RIGHTS': u"Copyright © {} Yak Blogger".format(datetime.now().year),
         'URL': u"http://example.com/",
         'OUTPUT_DIRECTORY': u"_site",
-        'SECRET_KEY': os.urandom(16).encode('hex'),
-        'USERNAME': u"admin",
-        'PASSWORD': u"admin",
         }
 
 def init(blog_dir, config=DEFAULT_CONFIG):
