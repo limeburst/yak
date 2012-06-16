@@ -34,7 +34,7 @@ MSG_INIT_SUCCESS = u"Your Yak blog has been created. Happy blogging!"
 MSG_POST_CONTENT_INVALID = \
         u"Post content is in an incorrect format. Missing 'Title: Post Title'?"
 MSG_POST_EXISTS = u"A post with the same filename already exists."
-MSG_POST_FILENAME_INVALID = u"Invalid filename. e.g., YYYY-mm-dd-slug.md"
+MSG_POST_FILENAME_INVALID = u"Invalid filename. e.g., YYYY-mm-dd-slug.md. Slug must be alphanumeric."
 MSG_POST_MOVED = u"Post {} has been moved to {}."
 MSG_POST_NOT_FOUND = u"The specified post '{}' could not be found."
 MSG_POST_REMOVED = u"Removed post {}."
@@ -157,6 +157,7 @@ def edit_revision(filename, revision):
             if i == 0:
                 future = None
 
+    moved = None
     for i, commit in enumerate(get_commits(filename)):
         if commit['move']:
             moved = commit['move'].split()[1][1:-1]
@@ -171,6 +172,8 @@ def edit_revision(filename, revision):
         path = os.path.join(blog_dir, get_location(filename), filename)
 
     markdown = subprocess.check_output(['hg', 'cat', '-r', revision, path])
+    markdown = markdown.decode('utf-8')
+    print type(markdown)
 
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,

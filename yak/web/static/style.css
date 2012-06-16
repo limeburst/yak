@@ -19,6 +19,9 @@ body {
     body {
         margin: 0 auto;
     }
+    h1 {
+        margin-top: 2em;
+    }
 }
 
 h1 {
@@ -79,6 +82,10 @@ h3 {
 
 textarea, input {
     box-sizing: border-box;
+    background: transparent;
+    border: none;
+    font-size: 1em;
+    color: #333;
 }
 
 body>ul {

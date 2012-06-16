@@ -15,7 +15,12 @@ def is_valid_filename(filename):
             return False
         if not filename[11:-3]:
             return False
-        return True
+        try:
+            filename.decode('ascii')
+        except UnicodeEncodeError:
+            return False
+        else:
+            return True
     else:
         return False
 
