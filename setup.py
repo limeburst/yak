@@ -1,4 +1,8 @@
 from setuptools import setup
+try:
+    import py2exe
+except:
+    pass
 
 setup(
     name='Yak',
@@ -20,5 +24,6 @@ setup(
     package_data={'yak': ['data/*'], 'yak.web': ['templates/*', 'static/*']},
     include_package_data=True,
     install_requires=['Flask', 'Markdown', 'BeautifulSoup', 'hgapi'],
-    scripts=['bin/yak']
+    scripts=['bin/yak'],
+    windows=['bin/yak'],
 )

@@ -1,4 +1,3 @@
-import hgapi
 import os
 import subprocess
 import sys
