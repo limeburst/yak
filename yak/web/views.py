@@ -17,28 +17,28 @@ from yak.web.utils import (
         )
 from yak.writer import write_config
 
-MSG_FILE_SAVED = u"Uploaded file '{0}'"
-MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{0}'"
+MSG_FILE_SAVED = u"Uploaded file '{}'"
+MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{}'"
 MSG_FILE_NOT_SELECTED = u"Please select a file."
-MSG_FILE_EXISTS = u"A file with the same name '{0}' already exists."
-MSG_FILE_DELETED = u"Deleted file '{0}'"
+MSG_FILE_EXISTS = u"A file with the same name '{}' already exists."
+MSG_FILE_DELETED = u"Deleted file '{}'"
 
 MSG_SETTINGS_SAVED = u"Saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
 MSG_BAKE_FAILED = u"Baking failed! Maybe you don't have any posts in the oven?"
-MSG_BAKE_SUCCESS = u"Your blog has been baked & updated @ {0}"
+MSG_BAKE_SUCCESS = u"Your blog has been baked & updated @ {}"
 MSG_INIT_SUCCESS = u"Your Yak blog has been created. Happy blogging!"
 
 MSG_POST_CONTENT_INVALID = \
         u"Post content is in an incorrect format. Missing 'Title: Post Title'?"
 MSG_POST_EXISTS = u"A post with the same filename already exists."
 MSG_POST_FILENAME_INVALID = u"Invalid filename. e.g., YYYY-mm-dd-slug.md. Slug must be alphanumeric."
-MSG_POST_MOVED = u"Post {0} has been moved to {1}."
-MSG_POST_NOT_FOUND = u"The specified post '{0}' could not be found."
-MSG_POST_REMOVED = u"Removed post {0}."
-MSG_POST_RENAMED = u"Post {0} has been renamed to {1}"
-MSG_POST_SAVED = u"The post {1} has been saved."
+MSG_POST_MOVED = u"Post {} has been moved to {}."
+MSG_POST_NOT_FOUND = u"The specified post '{}' could not be found."
+MSG_POST_REMOVED = u"Removed post {}."
+MSG_POST_RENAMED = u"Post {} has been renamed to {}"
+MSG_POST_SAVED = u"The post {} has been saved."
 
 blog_dir = app.config['PATH']
 
@@ -127,7 +127,7 @@ def new():
                 bake(blog_dir)
                 flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
             hg_add(filename)
-            hg_commit(filename, 'new post {0} in {1}'.format(filename, dest))
+            hg_commit(filename, 'new post {} in {}'.format(filename, dest))
             flash(MSG_POST_SAVED.format(filename))
             return render_template('posts.html', blog=app.config,
                     drafts=drafts(), oven=oven())
@@ -172,6 +172,7 @@ def edit_revision(filename, revision):
 
     markdown = subprocess.check_output(['hg', 'cat', '-r', revision, path])
     markdown = markdown.decode('utf-8')
+    print type(markdown)
 
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,
@@ -213,7 +214,7 @@ def edit(filename):
                     with open(os.path.join(blog_dir, location, filename),
                             'w', 'utf-8') as f:
                         f.write(markdown)
-                    hg_commit(filename, 'edited post {0}'.format(filename))
+                    hg_commit(filename, 'edited post {}'.format(filename))
                     flash(MSG_POST_SAVED.format(filename))
                     if 'publish' in action:
                         bake(blog_dir)

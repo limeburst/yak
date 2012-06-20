@@ -75,7 +75,7 @@ def is_valid_filename(root, filename):
         slug = filename[11:-3]
         if not slug:
             return False
-        url = datetime.strftime(published, "%Y/%m/%d/{0}/".format(slug))
+        url = datetime.strftime(published, "%Y/%m/%d/{}/".format(slug))
         return {
                 'root': root.decode('utf-8'),
                 'filename': filename.decode('utf-8'),

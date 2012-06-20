@@ -42,8 +42,8 @@ def default_post():
     now = datetime.now()
     date = datetime.strftime(now, "%Y-%m-%d")
     time = datetime.strftime(now, "%H:%M:%S")
-    filename = u"{0}-slug.md".format(date)
-    markdown = u"Title: New Post\nTime: {0}\n\nA new post!".format(time)
+    filename = u"{}-slug.md".format(date)
+    markdown = u"Title: New Post\nTime: {}\n\nA new post!".format(time)
     return filename, markdown
  
 def get_location(filename, reverse=False):
@@ -83,7 +83,7 @@ def hg_rename(source, target):
     subprocess.call([
         'hg', 'commit', source, target,
         '-u', app.config['AUTHOR'],
-        '-m', 'renamed {0} to {1}'.format(
+        '-m', 'renamed {} to {}'.format(
             os.path.basename(source),
             os.path.basename(target)
             )
@@ -96,7 +96,7 @@ def hg_move(source, target, dest):
     subprocess.call([
         'hg', 'commit', source, target,
         '-u', app.config['AUTHOR'],
-        '-m', 'moved {0} to {1}'.format(os.path.basename(source), dest)]
+        '-m', 'moved {} to {}'.format(os.path.basename(source), dest)]
         )
     if not os.path.exists(os.path.dirname(source)):
         os.mkdir(os.path.dirname(source))
@@ -107,7 +107,7 @@ def hg_remove(filename):
     subprocess.call([
         'hg', 'commit', os.path.join(blog_dir, location, filename),
         '-u', app.config['AUTHOR'],
-        '-m', 'deleted post {0}'.format(filename)]
+        '-m', 'deleted post {}'.format(filename)]
         )
     if not os.path.exists(os.path.join(blog_dir, location)):
         os.mkdir(os.path.join(blog_dir, location))
