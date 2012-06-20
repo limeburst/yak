@@ -245,7 +245,7 @@ def edit(filename):
         else:
             flash(MSG_POST_FILENAME_INVALID)
         return render_template('edit_post.html', blog=app.config,
-                filename=new_filename, markdown=markdown, action=action)
+                filename=filename, markdown=markdown, action=action)
 
 @app.route('/remove/<string:filename>')
 def remove(filename):
