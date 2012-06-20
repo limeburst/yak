@@ -16,7 +16,6 @@ DEFAULT_CONFIG = {
         'AUTHOR': u"Yak Blogger",
         'TITLE': u"Just another Yak blog.",
         'SUBTITLE': u"Yak Blogger's online basecamp.",
-        'RIGHTS': u"Copyright © {} Yak Blogger".format(datetime.now().year),
         'URL': u"http://example.com/",
         'OUTPUT_DIRECTORY': u"_site",
         }
