@@ -52,10 +52,10 @@ def init(blog_dir, config=DEFAULT_CONFIG):
                 with open(os.path.join(blog_dir, dir[0], file), 'w') as f:
                     f.write(get_data('yak', os.path.join('data', file)))
     except OSError:
-        print "Directory {} is not empty. Abort.".format(blog_dir)
+        print "Directory {0} is not empty. Abort.".format(blog_dir)
         return False
     else:
-        print ("Basic Yak blog structure has been created in '{}'\n"
+        print ("Basic Yak blog structure has been created in '{0}'\n"
                "Be sure to edit the '_config.py' configuration file before baking your blog.".format(blog_dir))
         return True
 
@@ -91,7 +91,11 @@ def bake(blog_dir):
 
     out_dir = blog.config['OUTPUT_DIRECTORY']
     blog.config['OUTPUT_DIRECTORY'] = tmp_out
-    bake(blog)
+    try:
+        bake(blog)
+    except ValueError:
+        print "No post to bake."
+        return False
     blog.config['OUTPUT_DIRECTORY'] = out_dir
 
     if os.path.exists(out_dir):
