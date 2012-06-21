@@ -68,6 +68,7 @@ def oven():
     return postlist(os.path.join(blog_dir, '_oven'))
 
 # TODO: Fix how Yak handles Mercurial commands
+# TODO: Use Mercurial's high level API
 # Use hg_commit only internally
 # Suppress using get_location. Explicit path!
 
