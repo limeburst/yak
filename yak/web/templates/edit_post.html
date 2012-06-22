@@ -2,15 +2,22 @@
 {% block title %}Edit Post{% endblock %}
 
 {% block content %}
+<h2>Edit Post</h2>
 <form action="{{ url_for('edit', filename=filename) }}" method="POST">
     <input type="text" name="filename" value="{{ filename }}"><br />
     <textarea name="markdown" rows="10" cols="40">{{ markdown }}</textarea><br />
-    <input type="submit" name="action" value="{{ action }}">
+    <ul>
+        {% if past %}
+        <a href="{{ url_for('edit_revision', filename=filename, revision=past) }}">&larr;</a>
+        {% else %}
+        &larr;
+        {% endif %}
+        <li><input type="submit" name="action" value="{{ action }}"></li>
+        {% if future %}
+        <a href="{{ url_for('edit_revision', filename=filename, revision=future) }}">&rarr;</a>
+        {% else %}
+        &rarr;
+        {% endif %}
+    </ul>
 </form>
-{% if past %}
-<a href="{{ url_for('edit_revision', filename=filename, revision=past) }}">Past</a>
-{% endif %}
-{% if future %}
-<a href="{{ url_for('edit_revision', filename=filename, revision=future) }}">Future</a>
-{% endif %}
 {% endblock %}

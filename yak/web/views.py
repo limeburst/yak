@@ -23,11 +23,11 @@ MSG_FILE_NOT_SELECTED = u"Please select a file."
 MSG_FILE_EXISTS = u"A file with the same name '{}' already exists."
 MSG_FILE_DELETED = u"Deleted file '{}'"
 
-MSG_SETTINGS_SAVED = u"Saved."
+MSG_SETTINGS_SAVED = u"Settings saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
 MSG_BAKE_FAILED = u"Baking failed! Maybe you don't have any posts in the oven?"
-MSG_BAKE_SUCCESS = u"Your blog has been baked & updated @ {}"
+MSG_BAKE_SUCCESS = u"Your blog has been baked & updated."
 MSG_INIT_SUCCESS = u"Your Yak blog has been created. Happy blogging!"
 
 MSG_POST_CONTENT_INVALID = \
@@ -109,23 +109,23 @@ def new():
         elif not is_valid_post(markdown, datetime.now()):
             flash(MSG_POST_CONTENT_INVALID)
         else:
-            if 'draft' in action:
+            if 'Draft' in action:
                 dest = 'drafts'
                 with open(os.path.join(blog_dir, '_drafts', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-            elif 'oven' in action:
+            elif 'Oven' in action:
                 dest = 'the oven'
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-            elif 'publish' in action:
+            elif 'Publish' in action:
                 dest = 'the oven'
                 with open(os.path.join(blog_dir, '_oven', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
                 bake(blog_dir)
-                flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
+                flash(MSG_BAKE_SUCCESS)
             hg_add(filename)
             hg_commit(filename, 'new post {} in {}'.format(filename, dest))
             flash(MSG_POST_SAVED.format(filename))
@@ -138,9 +138,9 @@ def new():
 def edit_revision(filename, revision):
     location = get_location(filename)
     if location == '_oven':
-        action = 'save and publish'
+        action = 'Save and Publish'
     else:
-        action = 'save'
+        action = 'Save'
 
     edit_commits = get_edit_commits(filename)
     for i, commit in enumerate(edit_commits):
@@ -187,9 +187,9 @@ def edit(filename):
                     'r', 'utf-8') as f:
                 markdown = f.read()
             if location == '_oven':
-                action = 'save and publish'
+                action = 'Save and Publish'
             else:
-                action = 'save'
+                action = 'Save'
             edit_commits = get_edit_commits(filename)
             try:
                 past = edit_commits[1]['node']
@@ -216,7 +216,7 @@ def edit(filename):
                         f.write(markdown)
                     hg_commit(filename, 'edited post {}'.format(filename))
                     flash(MSG_POST_SAVED.format(filename))
-                    if 'publish' in action:
+                    if 'Publish' in action:
                         bake(blog_dir)
                         flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
                     return render_template('posts.html', blog=app.config,
@@ -233,7 +233,7 @@ def edit(filename):
                                 )
                         flash(MSG_POST_RENAMED.format(filename, new_filename))
                         flash(MSG_POST_SAVED.format(new_filename))
-                        if 'publish' in action:
+                        if 'Publish' in action:
                             bake(blog_dir)
                             flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
                         return render_template('posts.html', blog=app.config,

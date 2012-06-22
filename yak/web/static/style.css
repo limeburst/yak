@@ -1,17 +1,17 @@
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; font: inherit; vertical-align: baseline; } /* HTML5 display-role reset for older browsers */ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; } body { line-height: 1; } ol, ul { list-style: none; } blockquote, q { quotes: none; } blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; } table { border-collapse: collapse; border-spacing: 0; } 
 
-table th {
-    text-decoration: underline;
-    padding-right: 2em;
+a, a:visited {
+    text-decoration: none;
+    color: #21759B;
 }
 
-table td {
-    width: 100%;
+h1, nav, footer {
+    text-align: center;
 }
 
 body {
-    font-family: 'Georgia';
     background-image: url('http://subtlepatterns.com/patterns/lightpaperfibers.png');
+    font-family: 'Georgia';
     max-width: 640px;
 }
 
@@ -19,82 +19,82 @@ body {
     body {
         margin: 0 auto;
     }
-    h1 {
-        margin-top: 2em;
-    }
 }
 
 h1 {
+    margin-top: 1em;
     font-size: 2em;
 }
 
-h3 {
-    margin: 0.5em 0;
+nav {
+    margin: 2em 0;
 }
 
-section ol li {
-    padding: 0.3em 0;
-}
-
-section ul {
-    text-align: center;
-}
-
-h1, nav, footer {
-    text-align: center;
-}
-
-h1, nav, footer, section {
-    padding: 1em 0;
-}
-
-nav li, section ul li {
-    margin-left: 1em;
+nav li {
     display: inline;
+    margin-left: 1em;
 }
 
-nav li:last-child, section ul li:last-child {
+nav li:last-child {
     margin-right: 1em;
-}
-
-textarea {
-    width: 100%;
-    font-family: 'PT Mono';
-}
-
-input[type="text"] {
-    width: 100%;
-    font-family: 'PT Mono';
-}
-
-a:visited, a {
-    color: #21759B;
-    text-decoration: none;
-}
-
-section, h2, body>ul {
-    margin: 0.5em;
-}
-
-h3 {
-    font-size: 1.5em;
-}
-
-textarea, input {
-    box-sizing: border-box;
-    background: transparent;
-    border: none;
-    font-size: 1em;
-    color: #333;
 }
 
 body>ul {
     color: #333;
+    margin-bottom: 1em;
 }
 
 body>ul li {
     padding: 0.5em;
     border-radius: 0.5em;
-    margin: 0.5em 0;
     background-color: #DFDFDF;
+    margin-bottom: 0.5em;
+}
+
+footer {
+    margin: 2em 0;
+}
+
+section, body>ul {
+    padding: 0 1em;
+}
+
+section h2 {
+    margin: 1em 0;
+    font-size: 1.2em;
+}
+
+section textarea, section input[type="text"] {
+    border-sizing: border-box;
+    width: 100%;
+    font-family: 'PT Mono';
+}
+
+section ul {
+    margin-top: 1em;
+    text-align: center;
+}
+
+section ul li {
+    display: inline;
+}
+
+section ol li {
+    margin: 0.5em 0;
+}
+
+section ol li a {
+    margin-left: 0.5em;
+}
+
+section table th {
+    padding: 0 1em;
+}
+
+section table td {
+    width: 100%;
+}
+
+section input[type="file"] {
+    margin-bottom: 1em;
 }

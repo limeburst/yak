@@ -2,26 +2,23 @@
 {% block title %}Media Library{% endblock %}
 
 {% block content %}
-<h3>Upload New</h3>
+<h2>Media Library</h2>
 <form action="{{ url_for('media') }}" method="POST" enctype="multipart/form-data">
-    <input type="file" name="file">
-    <input type="submit" value="upload">
+    <ul>
+        <li><input type="file" name="file"></li>
+        <li><input type="submit" value="Upload"></li>
+    </ul>
 </form>
-
 {% if medialist %}
-<h3>Recent Uploads</h3>
-<table>
-    {%- for filename in medialist[:50] -%}
-    <tr>
-        <th>
-            <a href="{{ url_for('remove_media', filename=filename) }}">Trash</a>
-        </th>
-        <td><a href="{{ url_for('media') }}{{ filename }}">{{ filename }}</a></td>
-    </tr>
-    {%- endfor %}
-</table>
+<ol>
+{%- for filename in medialist[:50] -%}
+<li>
+    <a href="{{ url_for('remove_media', filename=filename) }}">X</a>
+    <a href="{{ url_for('media') }}{{ filename }}">{{ filename }}</a></td>
+</li>
+{%- endfor %}
+</ol>
 {% else %}
 <p>There are no media files. Upload!</p>
 {% endif %}
-
 {% endblock %}

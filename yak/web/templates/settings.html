@@ -3,7 +3,7 @@
 
 {% block content %}
 <form method="POST" action="{{ url_for('settings') }}">
-    <h3>About this blog:</h3>
+    <h2>About this blog:</h2>
     <table>
         <tr>
             <th>Author</th>
@@ -22,8 +22,10 @@
             <td><input name="URL" type="text" value="{{ blog.URL }}" /></td>
         </tr>
     </table>
-    <h3>This blog will be baked to:</h3>
+    <h2>This blog will be baked to:</h2>
     <input name="OUTPUT_DIRECTORY" type="text" size="30" value="{{ blog.OUTPUT_DIRECTORY }}" />
-    <p><input type="submit" value="save" /></p>
+    <ul>
+        <li><input type="submit" value="Save Settings" /></li>
+    </ul>
 </form>
 {% endblock %}

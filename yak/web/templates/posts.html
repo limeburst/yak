@@ -2,11 +2,8 @@
 {% block title %}Posts{% endblock %}
 
 {% block content %}
-<ul>
-    <li><a href="{{ url_for('bake_blog') }}">Bake Now</a></li>
-    <li><a href="{{ url_for('new') }}">Add New</a></li>
-</ul>
-<h3>Drafts</h3>
+
+<h2>Drafts &mdash; <a href="{{ url_for('new') }}">New Post</a></h2>
 {% if drafts %}
 <ol>
 {%- for filename in drafts -%}
@@ -20,7 +17,8 @@
 {% else %}
 <p>There are no draft posts.</p>
 {% endif %}
-<h3>The Oven</h3>
+
+<h2>The Oven &mdash; <a href="{{ url_for('bake_blog') }}">Bake Now</a></h2>
 {% if oven %}
 <ol>
 {%- for filename in oven -%}
@@ -34,4 +32,5 @@
 {% else %}
 <p>There are no posts in the oven.</p>
 {% endif %}
+
 {% endblock %}

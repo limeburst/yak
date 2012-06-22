@@ -2,12 +2,14 @@
 {% block title %}New Post{% endblock %}
 
 {% block content %}
-<h3>New Post</h3>
+<h2>New Post</h2>
 <form action="{{ url_for('new') }}" method="POST">
     <input type="hidden" name="referer" value="new_post.html">
     <input type="text" name="filename" value="{{ filename }}">
     <textarea name="markdown" rows="4">{{ markdown }}</textarea>
-    <input type="submit" name="action" value="save as draft">
-    <input type="submit" name="action" value="save in the oven">
+    <ul>
+        <li><input type="submit" name="action" value="Save as Draft"></li>
+        <li><input type="submit" name="action" value="Save in The Oven"></li>
+    </ul>
 </form>
 {% endblock %}

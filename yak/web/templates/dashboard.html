@@ -2,14 +2,20 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h3>Quick Post</h3>
+<h2>Quick Post</h2>
 <form action="{{ url_for('new') }}" method="POST">
     <input type="hidden" name="referer" value="dashboard.html">
     <input type="text" name="filename" value="{{ filename }}">
     <textarea name="markdown" rows="4">{{ markdown }}</textarea>
     <ul>
-        <li><input type="submit" name="action" value="save as draft"></li>
-        <li><input type="submit" name="action" value="publish now"></li>
+        <li><input type="submit" name="action" value="Save as Draft"></li>
+        <li><input type="submit" name="action" value="Publish Now"></li>
     </ul>
 </form>
+<h2>Yak Updates and Related News</h2>
+<ol>
+    <li>2012-12-12<a></a></li>
+    <li>2012-12-12<a></a></li>
+    <li>2012-12-12<a></a></li>
+</ol>
 {% endblock %}
