@@ -172,7 +172,6 @@ def edit_revision(filename, revision):
 
     markdown = subprocess.check_output(['hg', 'cat', '-r', revision, path])
     markdown = markdown.decode('utf-8')
-    print type(markdown)
 
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,

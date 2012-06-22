@@ -64,10 +64,10 @@ section h2 {
     font-size: 1.2em;
 }
 
-section textarea, section input[type="text"] {
-    border-sizing: border-box;
-    width: 100%;
+table td, textarea, input[type="text"] {
     font-family: 'PT Mono';
+    width: 100%;
+    box-sizing: border-box;
 }
 
 section ul {
@@ -88,11 +88,7 @@ section ol li a {
 }
 
 section table th {
-    padding: 0 1em;
-}
-
-section table td {
-    width: 100%;
+    padding-right: 1em;
 }
 
 section input[type="file"] {
