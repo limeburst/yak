@@ -3,29 +3,30 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
-<h2>{{ self.title() }}</h2>
 <form method="POST" action="{{ url_for('init') }}">
-    <h3>About this blog:</h3>
+    <h2>About this blog:</h2>
     <table>
         <tr>
             <th>Author</th>
-            <td><input name="AUTHOR" type="text" size="40" value="{{ blog.AUTHOR }}" /></td>
+            <td><input name="AUTHOR" type="text" value="{{ blog.AUTHOR }}" /></td>
         </tr>
         <tr>
             <th>Title</th>
-            <td><input name="TITLE" type="text" size="40" value="{{ blog.TITLE }}" /></td>
+            <td><input name="TITLE" type="text" value="{{ blog.TITLE }}" /></td>
         </tr>
         <tr>
             <th>Subtitle</th>
-            <td><input name="SUBTITLE" type="text" size="40" value="{{ blog.SUBTITLE }}" /></td>
+            <td><input name="SUBTITLE" type="text" value="{{ blog.SUBTITLE }}" /></td>
         </tr>
         <tr>
             <th>URL</th>
-            <td><input name="URL" type="text" size="40" value="{{ blog.URL }}" /></td>
+            <td><input name="URL" type="text" value="{{ blog.URL }}" /></td>
         </tr>
     </table>
-    <h3>This blog will be baked to:</h3>
-    <input name="OUTPUT_DIRECTORY" type="text" size="20" value="{{ blog.OUTPUT_DIRECTORY }}" />
-    <p><input type="submit" value="Save" /></p>
+    <h2>This blog will be baked to:</h2>
+    <input name="OUTPUT_DIRECTORY" type="text" value="{{ blog.OUTPUT_DIRECTORY }}" />
+    <ul>
+        <li><input type="submit" value="Save Settings" /></li>
+    </ul>
 </form>
 {% endblock %}
