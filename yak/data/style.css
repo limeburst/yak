@@ -19,6 +19,9 @@ body {
     font-family: 'Georgia'; 
 }
 
+body>header { margin-top: 1em; }
+body>header h1 { display: inline; }
+
 article sup { line-height: 0; vertical-align: super; }
 article img, article iframe { max-width: 100%; display: block; margin: 1em auto; }
 article pre { overflow: auto; }

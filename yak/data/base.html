@@ -11,10 +11,7 @@
     </head>
     <body>
         <header>
-            <hgroup>
-                <h1><a href="{{ self.relative() }}">{{ blog.TITLE }}</a></h1>
-                <h2>by {{ blog.AUTHOR }}</h2>
-            </hgroup>
+            <h1><a href="{{ self.relative() }}">{{ blog.TITLE }}</a></h1> by {{ blog.AUTHOR }}
         </header>
         {%- block content -%}{%-  endblock -%}
         <footer>
