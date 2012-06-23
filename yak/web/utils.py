@@ -65,7 +65,7 @@ def drafts():
     return postlist(os.path.join(blog_dir, '_drafts'))
 
 def oven():
-    return postlist(os.path.join(blog_dir, '_oven'))
+    return reversed(postlist(os.path.join(blog_dir, '_oven')))
 
 # TODO: Fix how Yak handles Mercurial commands
 # TODO: Use Mercurial's high level API
