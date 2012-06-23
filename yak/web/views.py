@@ -17,6 +17,8 @@ from yak.web.utils import (
         )
 from yak.writer import write_config
 
+#TODO: Find a way to localize properly
+
 MSG_FILE_SAVED = u"Uploaded file '{}'"
 MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{}'"
 MSG_FILE_NOT_SELECTED = u"Please select a file."
@@ -93,6 +95,14 @@ def posts():
 
 @app.route('/new/', methods=['GET', 'POST'])
 def new():
+    """
+        New posts can be written from:
+
+        'Quick Post' at Dashboard [oven(publish), draft]
+        `New Post` at Posts [oven, draft]
+
+        Actions are sent as forms, and redirects are made by `referer`
+    """
     if request.method == 'GET':
         filename, markdown = default_post()
         return render_template('new_post.html',
@@ -142,6 +152,7 @@ def edit_revision(filename, revision):
     else:
         action = 'Save'
 
+    # We will only show 'edit' commits done to the user
     edit_commits = get_edit_commits(filename)
     for i, commit in enumerate(edit_commits):
         if commit['node'] == revision:
@@ -156,6 +167,7 @@ def edit_revision(filename, revision):
             if i == 0:
                 future = None
 
+    # Track the location of the post file
     moved = None
     for i, commit in enumerate(get_commits(filename)):
         if commit['move']:
@@ -179,6 +191,13 @@ def edit_revision(filename, revision):
 
 @app.route('/edit/<string:filename>', methods=['GET', 'POST'])
 def edit(filename):
+    """
+        Post edits can only happen from:
+
+        `Edit Post` at Posts [oven, draft]
+
+        Possible actions: [post rename, edit markdown]
+    """
     if request.method == 'GET':
         location = get_location(filename)
         if location:
