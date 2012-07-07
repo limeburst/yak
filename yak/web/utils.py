@@ -1,5 +1,5 @@
 import os
-import subprocess
+from mercurial import ui, hg, commands
 
 from codecs import open
 from datetime import datetime
@@ -68,58 +68,60 @@ def oven():
     return reversed(postlist(os.path.join(blog_dir, '_oven')))
 
 # TODO: Fix how Yak handles Mercurial commands
-# TODO: Use Mercurial's high level API
 # Use hg_commit only internally
 # Suppress using get_location. Explicit path!
 
 def hg_init(blog_dir):
-    subprocess.call(['hg', 'init', blog_dir])
+    face = ui.ui()
+    commands.init(face, blog_dir)
 
 def hg_add(filename):
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
     location = get_location(filename)
-    subprocess.call(['hg', 'add', os.path.join(blog_dir, location, filename)])
+    commands.add(face, repo, os.path.join(blog_dir, location, filename))
 
 def hg_rename(source, target):
-    subprocess.call(['hg', 'rename', source, target])
-    subprocess.call([
-        'hg', 'commit', source, target,
-        '-u', app.config['AUTHOR'],
-        '-m', 'renamed {} to {}'.format(
-            os.path.basename(source),
-            os.path.basename(target)
-            )
-        ])
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
+    commands.rename(face, repo, source, target)
+    commands.commit(face, repo, source, target,
+            user=app.config['AUTHOR'],
+            message='renamed {} to {}'.format(os.path.basename(source), os.path.basename(target))
+        )
     if not os.path.exists(os.path.dirname(source)):
         os.mkdir(os.path.dirname(source))
 
 def hg_move(source, target, dest):
-    subprocess.call(['hg', 'rename', source, target])
-    subprocess.call([
-        'hg', 'commit', source, target,
-        '-u', app.config['AUTHOR'],
-        '-m', 'moved {} to {}'.format(os.path.basename(source), dest)]
-        )
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
+    commands.rename(face, repo, source, target)
+    commands.commit(face, repo, source, target,
+            user=app.config['AUTHOR'],
+            message='moved {} to {}'.format(os.path.basename(source), dest),
+            )
     if not os.path.exists(os.path.dirname(source)):
         os.mkdir(os.path.dirname(source))
 
 def hg_remove(filename):
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
     location = get_location(filename)
-    subprocess.call(['hg', 'remove', os.path.join(blog_dir, location, filename)])
-    subprocess.call([
-        'hg', 'commit', os.path.join(blog_dir, location, filename),
-        '-u', app.config['AUTHOR'],
-        '-m', 'deleted post {}'.format(filename)]
-        )
+
+    commands.remove(face, repo, os.path.join(blog_dir, location, filename))
+    commands.commit(face, repo, os.path.join(blog_dir, location, filename),
+            user=app.config['AUTHOR'],
+            message='deleted post {}'.format(filename))
+
     if not os.path.exists(os.path.join(blog_dir, location)):
         os.mkdir(os.path.join(blog_dir, location))
 
 def hg_commit(filename, message):
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
     location = get_location(filename)
-    subprocess.call([
-        'hg', 'commit', os.path.join(blog_dir, location, filename),
-        '-u', app.config['AUTHOR'],
-        '-m', message]
-        )
+    commands.commit(face, repo, os.path.join(blog_dir, location, filename),
+            user=app.config['AUTHOR'], message=message)
 
 def get_edit_commits(filename):
     commits = get_commits(filename)
@@ -130,11 +132,15 @@ def get_edit_commits(filename):
     return edit_commits
 
 def get_commits(filename):
+    face = ui.ui()
+    repo = hg.repository(face, blog_dir)
     location = get_location(filename)
 
-    output = subprocess.check_output(['hg', 'log',
-        '--template', 'node:{node}\ndesc:{desc}\nmove:{file_copies}\n\n',
-        '-f', os.path.join(blog_dir, location, filename)])
+    face.pushbuffer()
+    commands.log(face, repo, os.path.join(blog_dir, location, filename),
+            date='', rev=[], follow=True,
+            template="node:{node}\ndesc:{desc}\nmove:{file_copies}\n\n")
+    output = face.popbuffer()
 
     commit = []
     commits = []
@@ -145,3 +151,7 @@ def get_commits(filename):
             commits.append(dict(commit))
             commit = []
     return commits
+
+def get_revision(filename, revision):
+    repo = hg.repository(ui.ui(), blog_dir)
+    return repo[revision][filename].data()

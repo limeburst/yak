@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 
 from codecs import open
@@ -12,7 +11,7 @@ from yak.reader import read_config, is_valid_post
 from yak.web import app
 from yak.web.utils import (
         default_post, get_location, is_valid_filename,
-        drafts, oven, medialist, get_edit_commits, get_commits,
+        drafts, oven, medialist, get_edit_commits, get_commits, get_revision,
         hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
         )
 from yak.writer import write_config
@@ -177,13 +176,14 @@ def edit_revision(filename, revision):
                 moved = commit['move'].split()[0]
             break
 
+    # get_revision takes paths relative to the repo root
+    # thanks to ronny @#mercurial
     if moved:
-        path = os.path.join(blog_dir, moved)
+        path = moved
     else:
-        path = os.path.join(blog_dir, get_location(filename), filename)
+        path = os.path.join(get_location(filename), filename)
 
-    markdown = subprocess.check_output(['hg', 'cat', '-r', revision, path])
-    markdown = markdown.decode('utf-8')
+    markdown = get_revision(path, revision)
 
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,
