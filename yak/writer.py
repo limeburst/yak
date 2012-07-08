@@ -4,6 +4,7 @@ from yak import DEFAULT_CONFIG
 
 import os
 import shutil
+import tempfile
 
 from BeautifulSoup import BeautifulSoup
 from codecs import open
@@ -17,8 +18,11 @@ def write_config(blog_dir, config=DEFAULT_CONFIG):
         f.write(template.render(blog=config))
 
 def bake(blog):
+    tmp_dir = tempfile.mkdtemp()
+    tmp_out = os.path.join(tmp_dir, 'yak')
+
     blog_dir = blog.config['PATH']
-    out_dir = blog.config['OUTPUT_DIRECTORY']
+    out_dir = tmp_out
     env = Environment(loader=FileSystemLoader(os.path.join(blog_dir, '_templates')))
 
     # Copy static files
@@ -104,3 +108,10 @@ def bake(blog):
     template = env.get_template('index.html')
     with open(os.path.join(out_dir, 'index.html'), 'w', 'utf-8') as f:
         f.write(template.render(blog=blog.config, posts=blog.posts, months=monthly_archive_pages, years=yearly_archive_pages))
+
+    out_dir = blog.config['OUTPUT_DIRECTORY']
+
+    if os.path.exists(out_dir):
+        shutil.rmtree(out_dir)
+    shutil.move(tmp_out, out_dir)
+    os.rmdir(tmp_dir)

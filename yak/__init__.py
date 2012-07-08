@@ -3,7 +3,7 @@
 import os
 
 from datetime import datetime
-from yak.reader import get_posts, read_config
+from yak.reader import read_config
 
 class Blog(object):
     def __init__(self, config, posts):
@@ -21,7 +21,7 @@ DEFAULT_CONFIG = {
         }
 
 def init(blog_dir, config=DEFAULT_CONFIG):
-    from yak.writer import write_config, DEFAULT_CONFIG
+    from yak.writer import write_config
     from pkgutil import get_data
 
     if not os.path.exists(blog_dir):
@@ -60,10 +60,8 @@ def init(blog_dir, config=DEFAULT_CONFIG):
         return True
 
 def bake(blog_dir):
-    import shutil
-    import tempfile
-
     from yak.writer import bake
+    from yak.reader import get_posts
 
     # Read blog configuration file
     config = read_config(blog_dir)
@@ -86,18 +84,7 @@ def bake(blog_dir):
     bake_started  = datetime.now()
     print "Baking started at {0}".format(bake_started)
 
-    tmp_dir = tempfile.mkdtemp()
-    tmp_out = os.path.join(tmp_dir, 'yak')
-
-    out_dir = blog.config['OUTPUT_DIRECTORY']
-    blog.config['OUTPUT_DIRECTORY'] = tmp_out
     bake(blog)
-    blog.config['OUTPUT_DIRECTORY'] = out_dir
-
-    if os.path.exists(out_dir):
-        shutil.rmtree(out_dir)
-    shutil.move(tmp_out, out_dir)
-    os.rmdir(tmp_dir)
 
     bake_finished = datetime.now()
     bake_delta = bake_finished - bake_started
