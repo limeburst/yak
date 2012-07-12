@@ -1,26 +1,30 @@
 {% extends "base.html" %}
 
 {% block title %}{{ archive_name }} &mdash; {{ blog.TITLE }}{% endblock %}
-{% block relative %}../{% endblock %}
+{% block relative %}{% if not yearly %}../{% endif %}../{% endblock %}
 
 {% block content %}
 <section>
     <h2>Archive for {{ archive_name }}</h2>
     <ol>
     {% for post in posts %}
-    <li>
-        <a href="{{ post.url[5:] }}">{{ post.title }}</a> &mdash;
-        {{ post.published_humanized[:-6] }} 
-    </li>
+        <li>
+            <a href="{% if yearly %}{{ post.url.month }}/{% endif %}{{ post.url.day }}/{{ post.slug }}/">{{ post.title }}</a> &mdash;
+            {{ post.published_humanized[:-6] }}
+        </li>
     {% endfor %}
     </ol>
 </section>
 <nav>
+{% if yearly %}
     <h2>Yearly Archives</h2>
+{% else %}
+    <h2>Monthly Archives</h2>
+{% endif %}
     <ol>
-        {% for page in pages %}
+    {% for page in pages %}
         <li><a href="{{ self.relative() }}{{ page.url }}">{{ page.title }}</a></li>
-        {% endfor %}
+    {% endfor %}
     </ol>
 </nav>
 {% endblock %}

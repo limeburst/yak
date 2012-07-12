@@ -1,20 +1,20 @@
 import os
-import sys
 
 from codecs import open
 from datetime import datetime
-from flask import Flask, render_template, request, flash, redirect, url_for, send_file
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file, g
 from werkzeug import secure_filename
 
 from yak import bake, DEFAULT_CONFIG
-from yak.reader import read_config, is_valid_post
-from yak.web import app
-from yak.web.utils import (
-        default_post, get_location, is_valid_filename,
-        drafts, oven, medialist, get_edit_commits, get_commits, get_revision,
-        hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
-        )
+from yak.reader import is_valid_post, is_valid_filename
 from yak.writer import write_config
+
+from yak.web import app
+from yak.web.utils import default_post, get_location, drafts, publish, medialist
+from yak.web.hg import (
+    hg_init, hg_add, hg_rename, hg_remove, hg_commit, hg_move,
+    hg_edit_commits, hg_commits, hg_revision
+    )
 
 #TODO: Find a way to localize properly
 
@@ -76,8 +76,10 @@ def init():
         init(blog_dir, request.form)
         hg_init(blog_dir)
 
-        hg_add('2012-01-01-howto-blog-using-yak.md')
-        hg_commit('2012-01-01-howto-blog-using-yak.md', 'new blog')
+        source = os.path.join(blog_dir, 'publish',
+                '2012-01-01-howto-blog-using-yak.md')
+        hg_add(source)
+        hg_commit(source, 'new blog')
 
         app.config = dict(app.config.items() + request.form.items())
         write_config(blog_dir, app.config)
@@ -90,16 +92,11 @@ def init():
 @app.route('/posts/')
 def posts():
     return render_template('posts.html', blog=app.config,
-            drafts=drafts(), oven=oven())
+            drafts=drafts(), publish=publish())
 
 @app.route('/new/', methods=['GET', 'POST'])
 def new():
     """
-        New posts can be written from:
-
-        'Quick Post' at Dashboard [oven(publish), draft]
-        `New Post` at Posts [oven, draft]
-
         Actions are sent as forms, and redirects are made by `referer`
     """
     if request.method == 'GET':
@@ -120,39 +117,35 @@ def new():
         else:
             if 'Draft' in action:
                 dest = 'drafts'
-                with open(os.path.join(blog_dir, '_drafts', filename),
-                        'w', 'utf-8') as f:
-                    f.write(markdown)
-            elif 'Oven' in action:
-                dest = 'the oven'
-                with open(os.path.join(blog_dir, '_oven', filename),
+                with open(os.path.join(blog_dir, 'drafts', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
             elif 'Publish' in action:
                 dest = 'the oven'
-                with open(os.path.join(blog_dir, '_oven', filename),
+                with open(os.path.join(blog_dir, 'publish', filename),
                         'w', 'utf-8') as f:
                     f.write(markdown)
-                bake(blog_dir)
-                flash(MSG_BAKE_SUCCESS)
-            hg_add(filename)
-            hg_commit(filename, 'new post {} in {}'.format(filename, dest))
+                bake_blog()
+
+            source = os.path.join(blog_dir, get_location(filename) )
+            hg_add(source)
+            hg_commit(source, 'new post {} in {}'.format(filename, dest))
             flash(MSG_POST_SAVED.format(filename))
             return render_template('posts.html', blog=app.config,
-                    drafts=drafts(), oven=oven())
+                    drafts=drafts(), publish=publish())
         return render_template(request.form['referer'], blog=app.config,
                 filename=filename, markdown=markdown)
 
 @app.route('/edit/<string:filename>/<string:revision>/')
 def edit_revision(filename, revision):
     location = get_location(filename)
-    if location == '_oven':
+    if location == 'publish':
         action = 'Save and Publish'
     else:
         action = 'Save'
 
     # We will only show 'edit' commits done to the user
-    edit_commits = get_edit_commits(filename)
+    edit_commits = hg_edit_commits(filename)
     for i, commit in enumerate(edit_commits):
         if commit['node'] == revision:
             try:
@@ -168,7 +161,7 @@ def edit_revision(filename, revision):
 
     # Track the location of the post file
     moved = None
-    for i, commit in enumerate(get_commits(filename)):
+    for i, commit in enumerate(hg_commits(filename)):
         if commit['move']:
             moved = commit['move'].split()[1][1:-1]
         if commit['node'] == revision:
@@ -176,14 +169,13 @@ def edit_revision(filename, revision):
                 moved = commit['move'].split()[0]
             break
 
-    # get_revision takes paths relative to the repo root
-    # thanks to ronny @#mercurial
+    # hg_revision takes paths relative to the repo root
+    # thanks to ronny@#mercurial
     if moved:
-        path = moved
+        relpath = moved
     else:
-        path = os.path.join(get_location(filename), filename)
-
-    markdown = get_revision(path, revision)
+        relpath = os.path.join(get_location(filename), filename)
+    markdown = hg_revision(relpath, revision)
 
     return render_template('edit_post.html', blog=app.config,
             filename=filename, markdown=markdown, action=action,
@@ -192,10 +184,6 @@ def edit_revision(filename, revision):
 @app.route('/edit/<string:filename>', methods=['GET', 'POST'])
 def edit(filename):
     """
-        Post edits can only happen from:
-
-        `Edit Post` at Posts [oven, draft]
-
         Possible actions: [post rename, edit markdown]
     """
     if request.method == 'GET':
@@ -204,11 +192,11 @@ def edit(filename):
             with open(os.path.join(blog_dir, location, filename),
                     'r', 'utf-8') as f:
                 markdown = f.read()
-            if location == '_oven':
+            if location == 'publish':
                 action = 'Save and Publish'
             else:
                 action = 'Save'
-            edit_commits = get_edit_commits(filename)
+            edit_commits = hg_edit_commits(filename)
             try:
                 past = edit_commits[1]['node']
             except IndexError:
@@ -219,7 +207,7 @@ def edit(filename):
         else:
             flash(MSG_POST_NOT_FOUND.format(name))
             return render_template('posts.html', blog=app.config,
-                    drafts=drafts(), oven=oven())
+                    drafts=drafts(), publish=publish())
     elif request.method == 'POST':
         new_filename = request.form['filename']
         markdown = request.form['markdown']
@@ -232,13 +220,13 @@ def edit(filename):
                     with open(os.path.join(blog_dir, location, filename),
                             'w', 'utf-8') as f:
                         f.write(markdown)
-                    hg_commit(filename, 'edited post {}'.format(filename))
+                    hg_commit(os.path.join(blog_dir, location, filename),
+                            'edited post {}'.format(filename))
                     flash(MSG_POST_SAVED.format(filename))
                     if 'Publish' in action:
-                        bake(blog_dir)
-                        flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
+                        bake_blog()
                     return render_template('posts.html', blog=app.config,
-                            drafts=drafts(), oven=oven())
+                            drafts=drafts(), publish=publish())
                 else:
                     # Filename changed
                     if not get_location(new_filename):
@@ -252,10 +240,9 @@ def edit(filename):
                         flash(MSG_POST_RENAMED.format(filename, new_filename))
                         flash(MSG_POST_SAVED.format(new_filename))
                         if 'Publish' in action:
-                            bake(blog_dir)
-                            flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
+                            bake_blog()
                         return render_template('posts.html', blog=app.config,
-                                drafts=drafts(), oven=oven())
+                                drafts=drafts(), publish=publish())
                     else:
                         flash(MSG_POST_EXISTS)
             else:
@@ -269,19 +256,19 @@ def edit(filename):
 def remove(filename):
     location = get_location(filename)
     if location:
-        hg_remove(filename)
+        hg_remove(os.path.join(blog_dir, location, filename))
         flash(MSG_POST_REMOVED.format(filename))
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
     return render_template('posts.html', blog=app.config,
-            drafts=drafts(), oven=oven())
+            drafts=drafts(), publish=publish())
 
 @app.route('/move/<string:filename>')
 def move(filename):
     location = get_location(filename)
     if location:
         new_location = get_location(filename, True)
-        if new_location == '_drafts':
+        if new_location == 'drafts':
             dest = 'drafts'
         else:
             dest = 'the oven'
@@ -291,10 +278,11 @@ def move(filename):
                 dest
                 )
         flash(MSG_POST_MOVED.format(filename, dest))
+        bake_blog()
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
     return render_template('posts.html', blog=app.config,
-            drafts=drafts(), oven=oven())
+            drafts=drafts(), publish=publish())
 
 @app.route('/bake/')
 def bake_blog():
@@ -305,7 +293,7 @@ def bake_blog():
     else:
         flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
     return render_template('posts.html', blog=app.config,
-            drafts=drafts(), oven=oven())
+            drafts=drafts(), publish=publish())
 
 @app.route('/media/', methods=['GET', 'POST'])
 def media():
@@ -327,7 +315,7 @@ def media():
 def send_media(filename):
     for media in medialist():
         if filename == media:
-            return send_file(os.path.join(blog_dir, '_oven', filename))
+            return send_file(os.path.join(blog_dir, 'publish', filename))
     flash(MSG_FILE_NOT_FOUND)
     return render_template('media.html', blog=app.config, medialist=medialist())
 
@@ -335,7 +323,7 @@ def send_media(filename):
 def remove_media(filename=None):
     for media in medialist():
         if filename == media:
-            os.remove(os.path.join(blog_dir, '_oven', filename))
+            os.remove(os.path.join(blog_dir, 'publish', filename))
             flash(MSG_FILE_DELETED.format(filename))
             return render_template('media.html', blog=app.config, medialist=medialist())
     flash(MSG_FILE_NOT_FOUND.format(filename))

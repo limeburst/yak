@@ -2,8 +2,20 @@
 
 import os
 
+from yak.reader import get_posts, read_config
+from yak.web import run_app
+from yak.writer import bake_blog, write_config
+
 from datetime import datetime
-from yak.reader import read_config
+from pkgutil import get_data
+
+DEFAULT_CONFIG = {
+        'AUTHOR': u"Yak Blogger",
+        'TITLE': u"Just another Yak blog.",
+        'SUBTITLE': u"Yak Blogger's online basecamp.",
+        'URL': u"http://example.com/",
+        'OUTPUT_DIRECTORY': u"output",
+        }
 
 class Blog(object):
     def __init__(self, config, posts):
@@ -12,38 +24,35 @@ class Blog(object):
         self.config['UPDATED'] = max(self.posts, key=lambda x: x.updated).updated
         self.config['UPDATED_RFC3999'] = datetime.strftime(self.config['UPDATED'], "%Y-%m-%dT%H:%M:%SZ")
 
-DEFAULT_CONFIG = {
-        'AUTHOR': u"Yak Blogger",
-        'TITLE': u"Just another Yak blog.",
-        'SUBTITLE': u"Yak Blogger's online basecamp.",
-        'URL': u"http://example.com/",
-        'OUTPUT_DIRECTORY': u"_site",
-        }
+class Post(object):
+    def __init__(self, root, filename, post):
+        self.root = root
+        self.filename = filename
+        self.slug = filename[11:-3]
+        self.title = post['title']
+        self.markdown = post['markdown']
+        self.html = post['html']
+        self.link = post['link']
+        self.published = post['published']
+        self.published_humanized = datetime.strftime(self.published, "%B %d, %Y")
+        self.published_rfc3999 = datetime.strftime(self.published, "%Y-%m-%dT%H:%M:%SZ")
+        self.updated = post['updated']
+        self.updated_rfc3999 = datetime.strftime(self.updated, "%Y-%m-%dT%H:%M:%SZ")
+        self.url = {
+                'year': str(self.published.year),
+                'month': str(self.published.month).rjust(2, '0'),
+                'day': str(self.published.day).rjust(2, '0'),
+                }
 
 def init(blog_dir, config=DEFAULT_CONFIG):
-    from yak.writer import write_config
-    from pkgutil import get_data
-
     if not os.path.exists(blog_dir):
         os.makedirs(blog_dir)
-
     oven_files = ['2012-01-01-howto-blog-using-yak.md']
     static_files = ['style.css', 'favicon.ico']
-    template_files = ['post.html',
-            'atom.xml',
-            'yearly_archive.html',
-            'monthly_archive.html',
-            'index.html',
-            'base.html'
-            ]
-
-    dirs = [
-            ('_drafts', []),
-            ('_oven', oven_files),
-            ('_static', static_files),
-            ('_templates', template_files),
-            ] 
-
+    template_files = ['post.html', 'atom.xml', 'archive.html', 'index.html',
+            'base.html']
+    dirs = [('drafts', []), ('publish', oven_files), ('static', static_files),
+            ('templates', template_files)] 
     try:
         write_config(blog_dir, config)
         for dir in dirs:
@@ -53,49 +62,35 @@ def init(blog_dir, config=DEFAULT_CONFIG):
                     f.write(get_data('yak', os.path.join('data', file)))
     except OSError:
         print "Directory {} is not empty. Abort.".format(blog_dir)
-        return False
     else:
         print ("Basic Yak blog structure has been created in '{}'\n"
-               "Be sure to edit the '_config.py' configuration file before baking your blog.".format(blog_dir))
-        return True
+               "Be sure to edit the 'config.py' configuration file before baking your blog.".format(blog_dir))
 
 def bake(blog_dir):
-    from yak.writer import bake
-    from yak.reader import get_posts
+    started = datetime.now()
+    print "Reading started at {}".format(started)
+    oven = get_posts(os.path.join(blog_dir, 'publish'))
+    finished = datetime.now()
+    delta = finished - started
+    print "Reading finished at {}. Took {} seconds. Read {} post(s).".format(
+            finished, delta.seconds, len(oven))
 
-    # Read blog configuration file
+    print
     config = read_config(blog_dir)
-
-    # Read blog posts
-    read_started = datetime.now()
-    print "Reading started at {0}".format(read_started)
-
-    oven = get_posts(os.path.join(blog_dir, '_oven'))
-
-    read_finished = datetime.now()
-    read_delta = read_finished - read_started
-    print "Reading finished at {0}".format(read_finished)
-    print "The reading timer reads {0} seconds.".format(read_delta.seconds)
-    print "Read {0} post(s).\n".format(len(oven))
-
     blog = Blog(config, oven)
 
-    # Bake the blog
-    bake_started  = datetime.now()
-    print "Baking started at {0}".format(bake_started)
-
-    bake(blog)
-
-    bake_finished = datetime.now()
-    bake_delta = bake_finished - bake_started
-    print "Baking finished at {0}".format(bake_finished)
-    print "The oven timer reads {0} seconds.".format(bake_delta.seconds)
+    started  = datetime.now()
+    print "Baking started at {}".format(started)
+    bake_blog(blog)
+    finished = datetime.now()
+    delta = finished - started
+    print "Baking finished at {}. Took {} seconds.".format(
+            finished, delta.seconds)
 
 def manage(blog_dir, port):
-    from yak.web import run_app
     config = read_config(blog_dir)
     config['APPLICATION_ROOT'] = os.path.abspath(blog_dir)
-    config['UPLOAD_FOLDER'] = os.path.join(config['APPLICATION_ROOT'], '_oven')
+    config['UPLOAD_FOLDER'] = os.path.join(config['APPLICATION_ROOT'], 'publish')
     config['PORT'] = port
     config['DEBUG'] = True
     run_app(config)

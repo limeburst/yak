@@ -19,7 +19,7 @@ body {
     font-family: 'Georgia'; 
 }
 
-body>header { margin-top: 1em; }
+body>header { margin: 1em 0 2em; }
 body>header h1 { display: inline; }
 
 article sup { line-height: 0; vertical-align: super; }

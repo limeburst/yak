@@ -6,37 +6,21 @@ from codecs import open
 from datetime import datetime
 from markdown import Markdown
 
-class Post(object):
-    def __init__(self, filename, post):
-        self.root = filename['root']
-        self.filename = filename['filename']
-        self.slug = filename['slug']
-        self.url = filename['url']
-        self.title = post['title']
-        self.markdown = post['markdown']
-        self.html = post['html']
-        self.link = post['link']
-        self.published = post['published']
-        self.published_humanized = datetime.strftime(self.published, "%B %d, %Y")
-        self.published_rfc3999 = datetime.strftime(self.published, "%Y-%m-%dT%H:%M:%SZ")
-        self.updated = post['updated']
-        self.updated_rfc3999 = datetime.strftime(self.updated, "%Y-%m-%dT%H:%M:%SZ")
-
 def read_config(blog_dir):
-    from yak import DEFAULT_CONFIG
-    config = DEFAULT_CONFIG.copy()
-    config['PATH'] = os.path.abspath(blog_dir)
+    config = {}
     tempdict = {}
     try:
-        execfile(os.path.join(blog_dir, '_config.py'), tempdict)
+        execfile(os.path.join(blog_dir, 'config.py'), tempdict)
     except IOError:
-        return config
+        from yak import DEFAULT_CONFIG
+        config = DEFAULT_CONFIG
     else:
         for key in tempdict:
             if key.isupper():
                 config[key] = tempdict[key]
     if not config['URL'].endswith('/'):
         config['URL'] += '/'
+    config['PATH'] = os.path.abspath(blog_dir)
     config['OUTPUT_DIRECTORY'] = os.path.join(config['PATH'], config['OUTPUT_DIRECTORY'])
     return config
 
@@ -44,29 +28,25 @@ def get_posts(post_dir):
     """
         Returns a list of Post objects for a given directory.
     """
+    from yak import Post
     posts = []
     for root, _, files in os.walk(post_dir):
         for filename in files:
-            valid_filename = is_valid_filename(root, filename)
-            if valid_filename:
+            published, slug = is_valid_filename(filename)
+            if published:
                 with open(os.path.join(root, filename), 'r', 'utf-8') as f:
                     markdown = f.read()
-                valid_post = is_valid_post(markdown, valid_filename['published'])
-                if valid_post:
-                    posts.append(Post(valid_filename, valid_post))
+                post = is_valid_post(markdown, published)
+                if post:
+                    posts.append(Post(root, filename, post))
     return posts
-    
-def get_postlist(post_dir):
-    postlist = []
-    for root, _, files in os.walk(post_dir):
-        for filename in files:
-            valid_filename = is_valid_filename(root, filename)
-            if valid_filename:
-                postlist.append(valid_filename)
-    return postlist
 
-def is_valid_filename(root, filename):
-    # Only handle files with proper name format. ex) 2012-01-01-hello-world.md
+def is_valid_filename(filename):
+    """
+        Only handle files with proper name format. ex) 2012-01-01-hello-world.md
+        Proper date, alphanumeric slug, extension
+        TODO: ASCII <> alphanumeric
+    """
     if filename.endswith('.md'):
         try:
             published = datetime.strptime(filename[:10], '%Y-%m-%d')
@@ -75,17 +55,12 @@ def is_valid_filename(root, filename):
         slug = filename[11:-3]
         if not slug:
             return False
-        url = datetime.strftime(published, "%Y/%m/%d/{}/".format(slug))
-        return {
-                'root': root.decode('utf-8'),
-                'filename': filename.decode('utf-8'),
-                'slug': slug.decode('utf-8'),
-                'published': published,
-                'url': url.decode('utf-8'),
-                }
-    else:
-        return False
-
+        try:
+            slug.decode('ascii')
+        except UnicodeEncodeError:
+            return False
+        return published, slug
+    return False
 
 def is_valid_post(markdown, published):
     """

@@ -9,7 +9,7 @@
 {%- for filename in drafts -%}
     <li>
         <a href="{{ url_for('remove', filename=filename) }}">X</a>
-        <a href="{{ url_for('move', filename=filename) }}">M</a>
+        <a href="{{ url_for('move', filename=filename) }}">P</a>
         <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
     </li>
 {%- endfor %}
@@ -18,19 +18,19 @@
 <p>There are no draft posts.</p>
 {% endif %}
 
-<h2>The Oven &mdash; <a href="{{ url_for('bake_blog') }}">Bake Now</a></h2>
-{% if oven %}
+<h2>Published &mdash; <a href="{{ url_for('bake_blog') }}">Bake Now</a></h2>
+{% if publish %}
 <ol>
-{%- for filename in oven -%}
+{%- for filename in publish -%}
     <li>
         <a href="{{ url_for('remove', filename=filename) }}">X</a>
-        <a href="{{ url_for('move', filename=filename) }}">M</a>
+        <a href="{{ url_for('move', filename=filename) }}">D</a>
         <a href="{{ url_for('edit', filename=filename) }}">{{ filename[:-3] }}</a>
     </li>
 {%- endfor %}
 </ol>
 {% else %}
-<p>There are no posts in the oven.</p>
+<p>There are no published posts.</p>
 {% endif %}
 
 {% endblock %}

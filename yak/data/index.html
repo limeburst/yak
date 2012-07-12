@@ -8,9 +8,9 @@
         {% if post.link %}
         <h1><a href="{{ post.link }}">{{ post.title }}</a></h1>
         <time datetime="{{ post.published_rfc3999 }}" pubdate>{{ post.published_humanized }}</time>
-        <a href="{{ post.url }}" class="permalink">∞</a>
+        <a href="{{ post.url.year }}/{{ post.url.month }}/{{ post.url.day }}/{{ post.slug }}/" class="permalink">∞</a>
         {% else %}
-        <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
+        <h1><a href="{{ post.url.year }}/{{ post.url.month }}/{{ post.url.day }}/{{ post.slug }}/">{{ post.title }}</a></h1>
         <time datetime="{{ post.published_rfc3999 }}" pubdate>{{ post.published_humanized }}</time>
         {% endif %}
     </header>
