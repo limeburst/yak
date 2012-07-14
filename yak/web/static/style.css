@@ -65,9 +65,13 @@ section h2 {
 }
 
 table td, textarea, input[type="text"] {
-    font-family: 'PT Mono';
+    font-family: 'Menlo', monospace;
     width: 100%;
     box-sizing: border-box;
+}
+
+.mono {
+    font-family: 'Menlo', monospace;
 }
 
 section ul {
@@ -85,6 +89,10 @@ section ol li {
 
 section ol li a {
     margin-left: 0.5em;
+}
+
+.remove, .remove:visited {
+    color: #BC0B0B;
 }
 
 section table th {
