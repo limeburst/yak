@@ -320,7 +320,8 @@ def media():
 def send_media(filename):
     for media in medialist():
         if filename == media:
-            return send_file(os.path.join(blog_dir, 'publish', filename))
+            return send_file(os.path.abspath(
+                os.path.join(app.config['UPLOAD_FOLDER'], filename)))
     flash(MSG_FILE_NOT_FOUND)
     return render_template('media.html', medialist=medialist())
 
