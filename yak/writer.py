@@ -4,7 +4,7 @@ import os
 import shutil
 import tempfile
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from codecs import open
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, Template
@@ -101,7 +101,9 @@ def bake_blog(blog):
         images = soup.findAll('img')
         for image in images:
             if not image['src'].startswith('http://'):
-                image['src'] = post.url + image['src']
+                image['src'] = '{}/{}/{}/{}/{}'.format(post.url['year'],
+                        post.url['month'], post.url['day'], post.slug,
+                        image['src'])
         post.html = soup
 
     # Render the ATOM feed
