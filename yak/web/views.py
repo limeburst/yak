@@ -40,7 +40,6 @@ MSG_POST_REMOVED = u"Removed post {}."
 MSG_POST_RENAMED = u"Post {} has been renamed to {}"
 MSG_POST_SAVED = u"The post {} has been saved."
 
-print app.config
 blog_dir = app.config['PATH']
 
 @app.errorhandler(400)
