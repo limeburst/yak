@@ -1,6 +1,7 @@
 import os
 from mercurial import ui, hg, commands
 
+from flask import g
 from yak.web import app
 from yak.web.utils import get_location
 
@@ -24,7 +25,7 @@ def hg_rename(source, target):
     repo = hg.repository(face, blog_dir)
     commands.rename(face, repo, source, target)
     commands.commit(face, repo, source, target,
-            user=app.config['AUTHOR'],
+            user=g.blog['AUTHOR'],
             message='renamed {} to {}'.format(os.path.basename(source), os.path.basename(target))
         )
     if not os.path.exists(os.path.dirname(source)):
@@ -35,7 +36,7 @@ def hg_move(source, target, dest):
     repo = hg.repository(face, blog_dir)
     commands.rename(face, repo, source, target)
     commands.commit(face, repo, source, target,
-            user=app.config['AUTHOR'],
+            user=g.blog['AUTHOR'],
             message='moved {} to {}'.format(os.path.basename(source), dest),
             )
     if not os.path.exists(os.path.dirname(source)):
@@ -47,7 +48,7 @@ def hg_remove(source):
     location = get_location(os.path.basename(source))
     commands.remove(face, repo, source)
     commands.commit(face, repo, source,
-            user=app.config['AUTHOR'],
+            user=g.blog['AUTHOR'],
             message='deleted post {}'.format(os.path.basename(source)))
     if not os.path.exists(os.path.dirname(source)):
         os.mkdir(os.path.dirname(source))
@@ -56,7 +57,7 @@ def hg_commit(source, message):
     face = ui.ui()
     repo = hg.repository(face, blog_dir)
     commands.commit(face, repo, source, message=message,
-            user=app.config['AUTHOR'])
+            user=g.blog['AUTHOR'])
 
 def hg_edit_commits(filename):
     commits = hg_commits(filename)

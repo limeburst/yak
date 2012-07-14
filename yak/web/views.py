@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for, sen
 from werkzeug import secure_filename
 
 from yak import bake, DEFAULT_CONFIG
-from yak.reader import is_valid_post, is_valid_filename
+from yak.reader import is_valid_post, is_valid_filename, read_config
 from yak.writer import write_config
 
 from yak.web import app
@@ -55,7 +55,7 @@ def blog_required(f):
 @app.before_request
 def before_request():
     if os.path.exists(blog_dir):
-        g.blog = True
+        g.blog = read_config(blog_dir)
     else:
         g.blog = False
 
@@ -63,16 +63,17 @@ def before_request():
 @blog_required
 def dashboard():
     filename, markdown = default_post()
-    return render_template('dashboard.html', blog=app.config,
+    return render_template('dashboard.html',
             filename=filename, markdown=markdown)
 
 @app.route('/init/', methods=['GET', 'POST'])
 def init():
     if request.method == 'GET':
-        if os.path.exists(blog_dir):
+        if g.blog:
             return redirect(url_for('dashboard'))
         else:
-            return render_template('init.html', blog=DEFAULT_CONFIG)
+            g.blog = DEFAULT_CONFIG
+            return render_template('init.html')
     elif request.method == 'POST':
         for key in request.form:
             if not request.form[key]:
@@ -81,6 +82,7 @@ def init():
 
         from yak import init
         init(blog_dir, request.form)
+        g.blog = read_config(blog_dir)
         hg_init(blog_dir)
 
         source = os.path.join(blog_dir, 'publish',
@@ -88,19 +90,17 @@ def init():
         hg_add(source)
         hg_commit(source, 'new blog')
 
-        app.config = dict(app.config.items() + request.form.items())
-        write_config(blog_dir, app.config)
+        write_config(blog_dir, request.form)
 
         flash(MSG_INIT_SUCCESS)
         filename, markdown = default_post()
-        return render_template('dashboard.html', blog=app.config,
+        return render_template('dashboard.html',
                 filename=filename, markdown=markdown)
 
 @app.route('/posts/')
 @blog_required
 def posts():
-    return render_template('posts.html', blog=app.config,
-            drafts=drafts(), publish=publish())
+    return render_template('posts.html', drafts=drafts(), publish=publish())
 
 @app.route('/new/', methods=['GET', 'POST'])
 @blog_required
@@ -111,7 +111,7 @@ def new():
     if request.method == 'GET':
         filename, markdown = default_post()
         return render_template('new_post.html',
-                blog=app.config, filename=filename, markdown=markdown)
+                filename=filename, markdown=markdown)
     elif request.method == 'POST':
         filename = request.form['filename']
         markdown = request.form['markdown']
@@ -141,9 +141,9 @@ def new():
             source = os.path.join(blog_dir, get_location(filename))
             hg_add(source)
             hg_commit(source, 'new post {} in {}'.format(filename, dest))
-            return render_template('posts.html', blog=app.config,
+            return render_template('posts.html',
                     drafts=drafts(), publish=publish())
-        return render_template(request.form['referer'], blog=app.config,
+        return render_template(request.form['referer'],
                 filename=filename, markdown=markdown)
 
 @app.route('/edit/<string:filename>/<string:revision>/')
@@ -188,9 +188,8 @@ def edit_revision(filename, revision):
         relpath = os.path.join(get_location(filename), filename)
     markdown = hg_revision(relpath, revision)
 
-    return render_template('edit_post.html', blog=app.config,
-            filename=filename, markdown=markdown, action=action,
-            past=past, future=future)
+    return render_template('edit_post.html', filename=filename,
+            markdown=markdown, action=action, past=past, future=future)
 
 @app.route('/edit/<string:filename>', methods=['GET', 'POST'])
 @blog_required
@@ -213,12 +212,11 @@ def edit(filename):
                 past = edit_commits[1]['node']
             except IndexError:
                 past = None
-            return render_template('edit_post.html', blog=app.config,
-                    filename=filename, markdown=markdown, action=action,
-                    past=past)
+            return render_template('edit_post.html', filename=filename,
+                    markdown=markdown, action=action, past=past)
         else:
             flash(MSG_POST_NOT_FOUND.format(name))
-            return render_template('posts.html', blog=app.config,
+            return render_template('posts.html',
                     drafts=drafts(), publish=publish())
     elif request.method == 'POST':
         new_filename = request.form['filename']
@@ -249,9 +247,9 @@ def edit(filename):
                 flash(MSG_POST_SAVED.format(new_filename))
                 if 'Publish' in action:
                     bake_blog()
-                return render_template('posts.html', blog=app.config,
+                return render_template('posts.html',
                         drafts=drafts(), publish=publish())
-        return render_template('edit_post.html', blog=app.config,
+        return render_template('edit_post.html',
                 filename=filename, markdown=markdown, action=action)
 
 @app.route('/remove/<string:filename>')
@@ -265,8 +263,7 @@ def remove(filename):
             bake_blog()
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
-    return render_template('posts.html', blog=app.config,
-            drafts=drafts(), publish=publish())
+    return render_template('posts.html', drafts=drafts(), publish=publish())
 
 @app.route('/move/<string:filename>')
 @blog_required
@@ -285,8 +282,7 @@ def move(filename):
         bake_blog()
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
-    return render_template('posts.html', blog=app.config,
-            drafts=drafts(), publish=publish())
+    return render_template('posts.html', drafts=drafts(), publish=publish())
 
 @app.route('/bake/')
 @blog_required
@@ -295,13 +291,12 @@ def bake_blog():
         bake(blog_dir)
     except ValueError:
         flash(MSG_BAKE_FAILED)
-    return render_template('posts.html', blog=app.config,
-            drafts=drafts(), publish=publish())
+    return render_template('posts.html', drafts=drafts(), publish=publish())
 
 @app.route('/view/')
 @blog_required
 def blog_view():
-    return redirect(app.config['URL'])
+    return redirect(g.blog['URL'])
 
 @app.route('/media/', methods=['GET', 'POST'])
 @blog_required
@@ -318,7 +313,7 @@ def media():
                 flash(MSG_FILE_EXISTS.format(filename))
         else:
             flash(MSG_FILE_NOT_SELECTED)
-    return render_template('media.html', blog=app.config, medialist=medialist())
+    return render_template('media.html', medialist=medialist())
 
 @app.route('/media/<string:filename>')
 @blog_required
@@ -327,7 +322,7 @@ def send_media(filename):
         if filename == media:
             return send_file(os.path.join(blog_dir, 'publish', filename))
     flash(MSG_FILE_NOT_FOUND)
-    return render_template('media.html', blog=app.config, medialist=medialist())
+    return render_template('media.html', medialist=medialist())
 
 @app.route('/media/remove/<string:filename>')
 @blog_required
@@ -336,10 +331,9 @@ def remove_media(filename=None):
         if filename == media:
             os.remove(os.path.join(blog_dir, 'publish', filename))
             flash(MSG_FILE_DELETED.format(filename))
-            return render_template('media.html',
-                    blog=app.config, medialist=medialist())
+            return render_template('media.html', medialist=medialist())
     flash(MSG_FILE_NOT_FOUND.format(filename))
-    return render_template('media.html', blog=app.config, medialist=medialist())
+    return render_template('media.html', medialist=medialist())
 
 @app.route('/settings/', methods=['GET', 'POST'])
 @blog_required
@@ -349,7 +343,6 @@ def settings():
             if not request.form[key]:
                 flash(MSG_SETTINGS_FILL)
                 return render_template('settings.html', blog=request.form)
-        app.config = dict(app.config.items() + request.form.items())
-        write_config(blog_dir, app.config)
+        write_config(blog_dir, request.form)
         flash(MSG_SETTINGS_SAVED)
-    return render_template('settings.html', blog=app.config)
+    return render_template('settings.html')

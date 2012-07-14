@@ -9,23 +9,23 @@
     <table>
         <tr>
             <th>Author</th>
-            <td><input name="AUTHOR" type="text" value="{{ blog.AUTHOR }}" /></td>
+            <td><input name="AUTHOR" type="text" value="{{ g.blog.AUTHOR }}" /></td>
         </tr>
         <tr>
             <th>Title</th>
-            <td><input name="TITLE" type="text" value="{{ blog.TITLE }}" /></td>
+            <td><input name="TITLE" type="text" value="{{ g.blog.TITLE }}" /></td>
         </tr>
         <tr>
             <th>Subtitle</th>
-            <td><input name="SUBTITLE" type="text" value="{{ blog.SUBTITLE }}" /></td>
+            <td><input name="SUBTITLE" type="text" value="{{ g.blog.SUBTITLE }}" /></td>
         </tr>
         <tr>
             <th>URL</th>
-            <td><input name="URL" type="text" value="{{ blog.URL }}" /></td>
+            <td><input name="URL" type="text" value="{{ g.blog.URL }}" /></td>
         </tr>
     </table>
     <h2>This blog will be baked to:</h2>
-    <input name="OUTPUT_DIRECTORY" type="text" value="{{ blog.OUTPUT_DIRECTORY }}" />
+    <input name="OUTPUT_DIRECTORY" type="text" value="{{ g.blog.OUTPUT_DIRECTORY }}" />
     <ul>
         <li><input type="submit" value="Save Settings" /></li>
     </ul>

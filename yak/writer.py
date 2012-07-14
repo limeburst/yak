@@ -118,8 +118,7 @@ def bake_blog(blog):
         f.write(template.render(blog=blog.config, posts=blog.posts,
             months=monthly_archive_pages, years=yearly_archive_pages))
 
-    out_dir = blog.config['OUTPUT_DIRECTORY']
-
+    out_dir = os.path.join(blog.config['PATH'], blog.config['OUTPUT_DIRECTORY'])
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
     shutil.move(tmp_out, out_dir)

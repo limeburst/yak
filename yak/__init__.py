@@ -3,7 +3,6 @@
 import os
 
 from yak.reader import get_posts, read_config
-from yak.web import run_app
 from yak.writer import bake_blog, write_config
 
 from datetime import datetime
@@ -82,6 +81,7 @@ def bake(blog_dir):
 
     print
     config = read_config(blog_dir)
+    config['PATH'] = blog_dir
     blog = Blog(config, oven)
 
     started  = datetime.now()
@@ -93,12 +93,14 @@ def bake(blog_dir):
             finished, delta.seconds)
 
 def manage(blog_dir, port):
-    config = read_config(blog_dir)
-    config['PATH'] = os.path.abspath(blog_dir)
-    config['UPLOAD_FOLDER'] = os.path.join(config['PATH'], 'publish')
-    config['PORT'] = port
-    config['DEBUG'] = True
-    run_app(config)
+    from yak.web import run_app
+    run_app({
+        'PORT': port,
+        'PATH': blog_dir,
+        'UPLOAD_FOLDER': os.path.join(blog_dir, 'publish'),
+        'SECRET_KEY': 'not_so_secret',
+        'DEBUG': True,
+        })
 
 def watch(blog_dir):
     try:

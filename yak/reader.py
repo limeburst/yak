@@ -20,8 +20,6 @@ def read_config(blog_dir):
                 config[key] = tempdict[key]
     if not config['URL'].endswith('/'):
         config['URL'] += '/'
-    config['PATH'] = os.path.abspath(blog_dir)
-    config['OUTPUT_DIRECTORY'] = os.path.join(config['PATH'], config['OUTPUT_DIRECTORY'])
     return config
 
 def get_posts(post_dir):
