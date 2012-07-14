@@ -101,36 +101,43 @@ def manage(blog_dir, port):
     run_app(config)
 
 def watch(blog_dir):
-    import traceback
     try:
         import pyinotify
     except ImportError:
-        print "The watch function requires pyinotify package to be installed on the system."
-        return False
+        print "Yak watch requires pyinotify to be installed on the system."
+    else:
+        import traceback
+        from time import gmtime, strftime
+        from yak.reader import is_valid_filename
 
-    class YakWatcher(pyinotify.ProcessEvent):
-        def __init__(self, blog_dir):
-            self.blog_dir = blog_dir
+        class YakWatcher(pyinotify.ProcessEvent):
+            def __init__(self, blog_dir):
+                self.blog_dir = blog_dir
 
-        def process_IN_CREATE(self, event):
-            if event.name == 'publish':
-                with open(os.path.join(self.blog_dir, 'yak.log'), 'w') as f:
-                    try:
-                        bake(self.blog_dir)
-                    except:
-                        f.write(traceback.format_exc())
-                        f.write('\nBlog baking failed!')
-                    else:
-                        f.write(strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime()))
-                        f.write('\nBlog baking success!')
-                try:
-                    os.remove(event.pathname)
-                except:
-                    os.rmdir(event.pathname)
+            def process_IN_CREATE(self, event):
+                if is_valid_filename(event.name) or event.name == 'publish':
+                    with open(os.path.join(self.blog_dir, 'yak.log'), 'w') as f:
+                        try:
+                            bake(self.blog_dir)
+                        except ValueError:
+                            f.write("You don't have anything to publish!")
+                        except:
+                            f.write(traceback.format_exc())
+                            f.write("\nBlog baking failed!")
+                        else:
+                            f.write(strftime("%a, %d %b %Y %H:%M:%S +0000",
+                                gmtime()))
+                            f.write("\nBlog baking success!")
+                    if event.name == 'publish':
+                        try:
+                            os.remove(event.pathname)
+                        except:
+                            os.rmdir(event.pathname)
 
-    wm = pyinotify.WatchManager()
-    wm.add_watch(blog_dir, pyinotify.IN_CREATE, rec=False)
-    yw = YakWatcher(blog_dir)
+        wm = pyinotify.WatchManager()
+        wm.add_watch(os.path.join(blog_dir, 'publish'),
+                pyinotify.ALL_EVENTS, rec=True)
+        yw = YakWatcher(blog_dir)
 
-    notifier = pyinotify.Notifier(wm, yw)
-    notifier.loop()
+        notifier = pyinotify.Notifier(wm, yw)
+        notifier.loop()
