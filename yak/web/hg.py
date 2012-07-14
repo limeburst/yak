@@ -90,4 +90,7 @@ def hg_commits(filename):
 
 def hg_revision(relpath, revision):
     repo = hg.repository(ui.ui(), blog_dir)
+    # Mercurial stores paths properly. Damn backslash sep!
+    if os.name == 'nt':
+        relpath = relpath.replace('\\', '/')
     return repo[revision][relpath].data()
