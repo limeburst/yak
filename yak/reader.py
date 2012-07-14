@@ -32,11 +32,11 @@ def get_posts(post_dir):
     posts = []
     for root, _, files in os.walk(post_dir):
         for filename in files:
-            published, slug = is_valid_filename(filename)
-            if published:
+            valid_filename = is_valid_filename(filename)
+            if valid_filename:
                 with open(os.path.join(root, filename), 'r', 'utf-8') as f:
                     markdown = f.read()
-                post = is_valid_post(markdown, published)
+                post = is_valid_post(markdown, valid_filename['published'])
                 if post:
                     posts.append(Post(root, filename, post))
     return posts
@@ -59,7 +59,7 @@ def is_valid_filename(filename):
             slug.decode('ascii')
         except UnicodeEncodeError:
             return False
-        return published, slug
+        return {'published': published, 'slug': slug}
     return False
 
 def is_valid_post(markdown, published):

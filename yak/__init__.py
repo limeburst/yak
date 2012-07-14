@@ -11,7 +11,7 @@ from pkgutil import get_data
 
 DEFAULT_CONFIG = {
         'AUTHOR': u"Yak Blogger",
-        'TITLE': u"Just another Yak blog.",
+        'TITLE': u"Just another Yak blog",
         'SUBTITLE': u"Yak Blogger's online basecamp.",
         'URL': u"http://example.com/",
         'OUTPUT_DIRECTORY': u"output",
@@ -21,8 +21,10 @@ class Blog(object):
     def __init__(self, config, posts):
         self.config = config
         self.posts = posts
-        self.config['UPDATED'] = max(self.posts, key=lambda x: x.updated).updated
-        self.config['UPDATED_RFC3999'] = datetime.strftime(self.config['UPDATED'], "%Y-%m-%dT%H:%M:%SZ")
+        self.config['UPDATED'] = max(self.posts,
+                key=lambda x: x.updated).updated
+        self.config['UPDATED_RFC3999'] = datetime.strftime(
+                self.config['UPDATED'], "%Y-%m-%dT%H:%M:%SZ")
 
 class Post(object):
     def __init__(self, root, filename, post):
@@ -34,10 +36,13 @@ class Post(object):
         self.html = post['html']
         self.link = post['link']
         self.published = post['published']
-        self.published_humanized = datetime.strftime(self.published, "%B %d, %Y")
-        self.published_rfc3999 = datetime.strftime(self.published, "%Y-%m-%dT%H:%M:%SZ")
+        self.published_humanized = datetime.strftime(self.published,
+                "%B %d, %Y")
+        self.published_rfc3999 = datetime.strftime(self.published,
+                "%Y-%m-%dT%H:%M:%SZ")
         self.updated = post['updated']
-        self.updated_rfc3999 = datetime.strftime(self.updated, "%Y-%m-%dT%H:%M:%SZ")
+        self.updated_rfc3999 = datetime.strftime(self.updated,
+                "%Y-%m-%dT%H:%M:%SZ")
         self.url = {
                 'year': str(self.published.year),
                 'month': str(self.published.month).rjust(2, '0'),
@@ -64,7 +69,7 @@ def init(blog_dir, config=DEFAULT_CONFIG):
         print "Directory {} is not empty. Abort.".format(blog_dir)
     else:
         print ("Basic Yak blog structure has been created in '{}'\n"
-               "Be sure to edit the 'config.py' configuration file before baking your blog.".format(blog_dir))
+               "Be sure to edit the config.py file.".format(blog_dir))
 
 def bake(blog_dir):
     started = datetime.now()
@@ -89,8 +94,8 @@ def bake(blog_dir):
 
 def manage(blog_dir, port):
     config = read_config(blog_dir)
-    config['APPLICATION_ROOT'] = os.path.abspath(blog_dir)
-    config['UPLOAD_FOLDER'] = os.path.join(config['APPLICATION_ROOT'], 'publish')
+    config['PATH'] = os.path.abspath(blog_dir)
+    config['UPLOAD_FOLDER'] = os.path.join(config['PATH'], 'publish')
     config['PORT'] = port
     config['DEBUG'] = True
     run_app(config)

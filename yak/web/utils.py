@@ -6,7 +6,7 @@ from datetime import datetime
 from yak.web import app
 from yak.reader import is_valid_filename
 
-blog_dir = app.config['APPLICATION_ROOT']
+blog_dir = app.config['PATH']
 
 def postlist(post_dir):
     postlist = []

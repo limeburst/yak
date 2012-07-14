@@ -4,7 +4,7 @@ from mercurial import ui, hg, commands
 from yak.web import app
 from yak.web.utils import get_location
 
-blog_dir = app.config['APPLICATION_ROOT']
+blog_dir = app.config['PATH']
 
 # TODO: Fix how Yak handles Mercurial commands
 # Use hg_commit only internally

@@ -27,8 +27,7 @@ MSG_FILE_DELETED = u"Deleted file '{}'"
 MSG_SETTINGS_SAVED = u"Settings saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
-MSG_BAKE_FAILED = u"Baking failed! Maybe you don't have any posts in the oven?"
-MSG_BAKE_SUCCESS = u"Your blog has been baked & updated."
+MSG_BAKE_FAILED = u"Publish failed! Maybe you don't have any posts to publish?"
 MSG_INIT_SUCCESS = u"Your Yak blog has been created. Happy blogging!"
 
 MSG_POST_CONTENT_INVALID = \
@@ -41,6 +40,7 @@ MSG_POST_REMOVED = u"Removed post {}."
 MSG_POST_RENAMED = u"Post {} has been renamed to {}"
 MSG_POST_SAVED = u"The post {} has been saved."
 
+print app.config
 blog_dir = app.config['PATH']
 
 @app.errorhandler(400)
@@ -107,8 +107,8 @@ def new():
         filename = request.form['filename']
         markdown = request.form['markdown']
         action = request.form['action']
-        valid_filename = is_valid_filename(filename)
-        if not valid_filename:
+        
+        if not is_valid_filename(filename):
             flash(MSG_POST_FILENAME_INVALID)
         elif get_location(filename):
             flash(MSG_POST_EXISTS)
@@ -290,10 +290,12 @@ def bake_blog():
         bake(blog_dir)
     except ValueError:
         flash(MSG_BAKE_FAILED)
-    else:
-        flash(MSG_BAKE_SUCCESS.format(app.config['URL']))
     return render_template('posts.html', blog=app.config,
             drafts=drafts(), publish=publish())
+
+@app.route('/view/')
+def blog_view():
+    return redirect(app.config['URL'])
 
 @app.route('/media/', methods=['GET', 'POST'])
 def media():
