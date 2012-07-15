@@ -16,6 +16,7 @@ def write_config(blog_dir, config):
         f.write(template.render(blog=config))
 
 def bake_blog(blog):
+    # Prepare the bakery
     tmp_dir = tempfile.mkdtemp()
     tmp_out = os.path.join(tmp_dir, 'yak')
     blog_dir = blog.config['PATH']
@@ -33,16 +34,23 @@ def bake_blog(blog):
                 post.url['year'], post.url['month'], post.url['day'], post.slug)
         os.makedirs(post_out_dir)
         soup = BeautifulSoup(post.html)
-        images = soup.findAll('img')
-        for image in images:
-            if not image['src'].startswith("http://"):
-                img_dir = image['src'].replace('/', os.sep)
-                if '/' in image['src']:
-                    os.makedirs(os.path.join(post_out_dir,
-                        os.path.dirname(img_dir)))
+        refs = soup.findAll('a') + soup.findAll('img')
+        for ref in refs:
+            try:
+                link = ref['src']
+            except KeyError:
                 try:
-                    shutil.copyfile(os.path.join(post.root, img_dir),
-                            os.path.join(post_out_dir, img_dir))
+                    link = ref['href']
+                except KeyError:
+                    continue
+            if not link.startswith("http://"):
+                ref_dir = link.replace('/', os.sep)
+                if '/' in link:
+                    os.makedirs(os.path.join(post_out_dir,
+                        os.path.dirname(ref_dir)))
+                try:
+                    shutil.copyfile(os.path.join(post.root, ref_dir),
+                            os.path.join(post_out_dir, ref_dir))
                 except IOError:
                     continue
         with open(os.path.join(post_out_dir, 'index.html'), 'w', 'utf-8') as f:
@@ -95,15 +103,27 @@ def bake_blog(blog):
                 archive_name=datetime.strftime(key, "%B %Y"),
                 pages=monthly_archive_pages))
 
-    # Edit img src for the front page and the ATOM feed
+    # Edit ref(a, img) src for the front page and the ATOM feed
     for post in blog.posts:
         soup = BeautifulSoup(post.html)
-        images = soup.findAll('img')
-        for image in images:
-            if not image['src'].startswith('http://'):
-                image['src'] = '{}/{}/{}/{}/{}'.format(post.url['year'],
-                        post.url['month'], post.url['day'], post.slug,
-                        image['src'])
+        refs = soup.findAll('a') + soup.findAll('img')
+        for ref in refs:
+            try:
+                link = ref['src']
+                img = True
+            except KeyError:
+                try:
+                    link = ref['href']
+                    img = False
+                except KeyError:
+                    continue
+            if not link.startswith('http://'):
+                link = '{}/{}/{}/{}/{}'.format(post.url['year'],
+                        post.url['month'], post.url['day'], post.slug, link)
+            if img:
+                ref['src'] = link
+            else:
+                ref['href'] = link
         post.html = soup
 
     # Render the ATOM feed
