@@ -18,8 +18,8 @@ def read_config(blog_dir):
         for key in tempdict:
             if key.isupper():
                 config[key] = tempdict[key]
-    if not config['URL'].endswith('/'):
-        config['URL'] += '/'
+    if config['URL'].endswith('/'):
+        config['URL'] = config['URL'][:-1]
     return config
 
 def get_posts(post_dir):
