@@ -29,7 +29,7 @@ MSG_SETTINGS_SAVED = u"Settings saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
 MSG_BAKE_FAILED = u"Publish failed! Maybe you don't have any posts to publish?"
-MSG_INIT_SUCCESS = u"Your Yak blog has been created. Happy blogging!"
+MSG_INIT_SUCCESS = u"Your blog has been created. Happy blogging!"
 
 MSG_POST_CONTENT_INVALID = \
         u"Post content is in an incorrect format. Missing 'Title: Post Title'?"
@@ -83,16 +83,16 @@ def init():
         from yak import init
         init(blog_dir, request.form)
         g.blog = read_config(blog_dir)
+
         hg_init(blog_dir)
+        for post in publish():
+            source = os.path.join(blog_dir, 'publish',  post)
+            hg_add(source)
+            hg_commit(source, 'new blog')
 
-        source = os.path.join(blog_dir, 'publish',
-                '2012-01-01-howto-blog-using-yak.md')
-        hg_add(source)
-        hg_commit(source, 'new blog')
-
-        write_config(blog_dir, request.form)
-
+        bake_blog()
         flash(MSG_INIT_SUCCESS)
+
         filename, markdown = default_post()
         return render_template('dashboard.html',
                 filename=filename, markdown=markdown)
@@ -215,7 +215,7 @@ def edit(filename):
             return render_template('edit_post.html', filename=filename,
                     markdown=markdown, action=action, past=past)
         else:
-            flash(MSG_POST_NOT_FOUND.format(name))
+            flash(MSG_POST_NOT_FOUND.format(filename))
             return render_template('posts.html',
                     drafts=drafts(), publish=publish())
     elif request.method == 'POST':
@@ -291,7 +291,6 @@ def bake_blog():
         bake(blog_dir)
     except ValueError:
         flash(MSG_BAKE_FAILED)
-    return render_template('posts.html', drafts=drafts(), publish=publish())
 
 @app.route('/view/')
 @blog_required
@@ -345,5 +344,6 @@ def settings():
                 flash(MSG_SETTINGS_FILL)
                 return render_template('settings.html', blog=request.form)
         write_config(blog_dir, request.form)
+        g.blog = read_config(blog_dir)
         flash(MSG_SETTINGS_SAVED)
     return render_template('settings.html')
