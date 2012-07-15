@@ -20,15 +20,15 @@ from yak.web.hg import (
 #TODO: Find a way to localize properly
 
 MSG_FILE_SAVED = u"Uploaded file '{}'"
-MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{}'"
-MSG_FILE_NOT_SELECTED = u"Please select a file."
-MSG_FILE_EXISTS = u"A file with the same name '{}' already exists."
 MSG_FILE_DELETED = u"Deleted file '{}'"
+MSG_FILE_NOT_SELECTED = u"Please select a file."
+MSG_FILE_NOT_FOUND = u"Cannot find the specified file '{}'"
+MSG_FILE_EXISTS = u"A file with the same name '{}' already exists."
 
-MSG_SETTINGS_SAVED = u"Settings saved."
+MSG_SETTINGS_SAVED = u"Your settings have been saved."
 MSG_SETTINGS_FILL = u"Please fill in all the fields."
 
-MSG_BAKE_FAILED = u"Publish failed! Maybe you don't have any posts to publish?"
+MSG_BAKE_FAILED = u"Publishing failed! Maybe you don't have any valid posts to publish?"
 MSG_INIT_SUCCESS = u"Your blog has been created. Happy blogging!"
 
 MSG_POST_CONTENT_INVALID = \
@@ -77,8 +77,9 @@ def init():
     elif request.method == 'POST':
         for key in request.form:
             if not request.form[key]:
-                flash(u"Please fill in all the fields")
-                return render_template('init.html', blog=request.form)
+                flash(MSG_SETTINGS_FILL)
+                g.blog = request.form
+                return render_template('init.html')
 
         from yak import init
         init(blog_dir, request.form)
@@ -92,10 +93,7 @@ def init():
 
         bake_blog()
         flash(MSG_INIT_SUCCESS)
-
-        filename, markdown = default_post()
-        return render_template('dashboard.html',
-                filename=filename, markdown=markdown)
+        return redirect(url_for('dashboard'))
 
 @app.route('/posts/')
 @blog_required
@@ -141,8 +139,7 @@ def new():
             source = os.path.join(blog_dir, get_location(filename))
             hg_add(source)
             hg_commit(source, 'new post {} in {}'.format(filename, dest))
-            return render_template('posts.html',
-                    drafts=drafts(), publish=publish())
+            return redirect(url_for('posts'))
         return render_template(request.form['referer'],
                 filename=filename, markdown=markdown)
 
@@ -216,8 +213,7 @@ def edit(filename):
                     markdown=markdown, action=action, past=past)
         else:
             flash(MSG_POST_NOT_FOUND.format(filename))
-            return render_template('posts.html',
-                    drafts=drafts(), publish=publish())
+            return redirect(url_for('posts'))
     elif request.method == 'POST':
         new_filename = request.form['filename']
         markdown = request.form['markdown']
@@ -247,8 +243,7 @@ def edit(filename):
                 flash(MSG_POST_SAVED.format(new_filename))
                 if 'Publish' in action:
                     bake_blog()
-                return render_template('posts.html',
-                        drafts=drafts(), publish=publish())
+                return redirect(url_for('posts'))
         return render_template('edit_post.html',
                 filename=filename, markdown=markdown, action=action)
 
@@ -263,7 +258,7 @@ def remove(filename):
             bake_blog()
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
-    return render_template('posts.html', drafts=drafts(), publish=publish())
+    return redirect(url_for('posts'))
 
 @app.route('/move/<string:filename>')
 @blog_required
@@ -282,10 +277,14 @@ def move(filename):
         bake_blog()
     else:
         flash(MSG_POST_NOT_FOUND.format(filename))
-    return render_template('posts.html', drafts=drafts(), publish=publish())
+    return redirect(url_for('posts'))
 
 @app.route('/bake/')
 @blog_required
+def republish():
+    bake_blog()
+    return redirect(url_for('settings'))
+
 def bake_blog():
     try:
         bake(blog_dir)
@@ -317,22 +316,21 @@ def media():
 @app.route('/media/<string:filename>')
 @blog_required
 def send_media(filename):
-    for media in medialist():
-        if filename == media:
-            return send_file(os.path.abspath(
-                os.path.join(app.config['UPLOAD_FOLDER'], filename)))
-    flash(MSG_FILE_NOT_FOUND)
-    return render_template('media.html', medialist=medialist())
+    if filename in medialist():
+        return send_file(os.path.abspath(
+            os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+    else:
+        flash(MSG_FILE_NOT_FOUND.format(filename))
+        return redirect(url_for('media'))
 
 @app.route('/media/remove/<string:filename>')
 @blog_required
 def remove_media(filename=None):
-    for media in medialist():
-        if filename == media:
-            os.remove(os.path.join(blog_dir, 'publish', filename))
-            flash(MSG_FILE_DELETED.format(filename))
-            return render_template('media.html', medialist=medialist())
-    flash(MSG_FILE_NOT_FOUND.format(filename))
+    if filename in medialist():
+        os.remove(os.path.join(blog_dir, 'publish', filename))
+        flash(MSG_FILE_DELETED.format(filename))
+    else:
+        flash(MSG_FILE_NOT_FOUND.format(filename))
     return render_template('media.html', medialist=medialist())
 
 @app.route('/settings/', methods=['GET', 'POST'])
@@ -342,7 +340,8 @@ def settings():
         for key in request.form:
             if not request.form[key]:
                 flash(MSG_SETTINGS_FILL)
-                return render_template('settings.html', blog=request.form)
+                g.blog = request.form
+                return render_template('settings.html')
         write_config(blog_dir, request.form)
         g.blog = read_config(blog_dir)
         flash(MSG_SETTINGS_SAVED)

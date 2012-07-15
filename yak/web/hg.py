@@ -7,10 +7,6 @@ from yak.web.utils import get_location
 
 blog_dir = app.config['PATH']
 
-# TODO: Fix how Yak handles Mercurial commands
-# Use hg_commit only internally
-# Suppress using get_location. Explicit path!
-
 def hg_init(blog_dir):
     face = ui.ui()
     commands.init(face, blog_dir)
