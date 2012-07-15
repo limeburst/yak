@@ -14,7 +14,7 @@
 {%- for filename in medialist[:50] -%}
 <li>
     <a href="{{ url_for('remove_media', filename=filename) }}" class="remove mono">X</a>
-    <a href="{{ url_for('media') }}{{ filename }}" class="mono">{{ filename }}</a></td>
+    <a href="{{ url_for('media') }}{{ filename }}" class="mono">{{ filename }}</a>
 </li>
 {%- endfor %}
 </ol>
