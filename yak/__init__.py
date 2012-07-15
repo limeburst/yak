@@ -16,6 +16,11 @@ DEFAULT_CONFIG = {
         'OUTPUT_DIRECTORY': u"output",
         }
 
+DEFAULT_POSTS = [
+            '2012-01-01-howto-blog-using-yak.md',
+            '2012-01-02-markdown-guide.md',
+            ]
+
 class Blog(object):
     def __init__(self, config, posts):
         self.config = config
@@ -51,12 +56,15 @@ class Post(object):
 def init(blog_dir, config=DEFAULT_CONFIG):
     if not os.path.exists(blog_dir):
         os.makedirs(blog_dir)
-    oven_files = ['2012-01-01-howto-blog-using-yak.md']
-    static_files = ['style.css', 'favicon.ico']
-    template_files = ['post.html', 'atom.xml', 'archive.html', 'index.html',
-            'base.html']
-    dirs = [('drafts', []), ('publish', oven_files), ('static', static_files),
-            ('templates', template_files)] 
+    templates = ['base.html', 'index.html', 'post.html', 'archive.html',
+            'atom.xml']
+    publishes = ['yak.png'] + DEFAULT_POSTS
+    dirs = [
+            ('drafts', []),
+            ('static', ['style.css', 'favicon.ico']),
+            ('publish', publishes),
+            ('templates', templates)
+            ] 
     try:
         write_config(blog_dir, config)
         for dir in dirs:

@@ -30,8 +30,8 @@ def bake_blog(blog):
     # Bake pages for each post
     template = env.get_template('post.html')
     for post in blog.posts:
-        post_out_dir = os.path.join(out_dir,
-                post.url['year'], post.url['month'], post.url['day'], post.slug)
+        post_out_dir = os.path.join(out_dir, post.url['year'],
+                post.url['month'], post.url['day'], post.slug)
         os.makedirs(post_out_dir)
         soup = BeautifulSoup(post.html)
         refs = soup.findAll('a') + soup.findAll('img')
@@ -67,8 +67,7 @@ def bake_blog(blog):
             yearly_archives[post.published.year] = [post]
             yearly_archive_pages.append({
                 'url': '{}/'.format(post.url['year']),
-                'title': post.published.year
-                })
+                'title': post.published.year})
         try:
             monthly_archives[post.published.replace(day=1, hour=0, minute=0,
                 second=0)].append(post)
@@ -77,8 +76,7 @@ def bake_blog(blog):
                 second=0)] = [post]
             monthly_archive_pages.append({
                 'url': '{}/{}/'.format(post.url['year'], post.url['month']),
-                'title': datetime.strftime(post.published, "%b %Y")
-                })
+                'title': datetime.strftime(post.published, "%b %Y")})
     monthly_archive_pages.reverse()
     yearly_archive_pages.reverse()
 
@@ -88,8 +86,7 @@ def bake_blog(blog):
         archive_out_dir = os.path.join(out_dir, str(key), 'index.html')
         with open(archive_out_dir, 'w', 'utf-8') as f:
             f.write(template.render(blog=blog.config,
-                posts=yearly_archives[key],
-                archive_name=key, yearly=True,
+                posts=yearly_archives[key], archive_name=key, yearly=True,
                 pages=yearly_archive_pages))
 
     # Render the monthly archive pages
