@@ -186,7 +186,7 @@ def edit_revision(filename, revision):
         relpath = moved
     else:
         relpath = os.path.join(get_location(filename), filename)
-    markdown = hg_revision(relpath, revision)
+    markdown = hg_revision(relpath, revision).decode('utf-8')
 
     return render_template('edit_post.html', filename=filename,
             markdown=markdown, action=action, past=past, future=future)
