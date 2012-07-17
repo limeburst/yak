@@ -14,7 +14,7 @@ int main(){
 
 Embedding images:
 
-![Image of a Yak](yak.png "This Yak is yet to be shaved.")
+![Image of a Yak](yak.jpg "This Yak is yet to be shaved.")
 ![Twitter Bird White On Blue](http://twitter.com/images/resources/twitter-bird-white-on-blue.png "Twitter")
 
 Links and unordered list:
