@@ -44,6 +44,12 @@ MSG_POST_DRAFTED = u"Post '{}' has been moved to drafts."
 
 blog_dir = app.config['PATH']
 
+def bake_blog():
+    try:
+        bake(blog_dir)
+    except ValueError:
+        flash(MSG_BAKE_FAILED)
+
 def blog_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -112,6 +118,8 @@ def new():
                 filename=filename, markdown=markdown)
     elif request.method == 'POST':
         filename = request.form['filename']
+        if not filename.endswith('.md'):
+            filename += '.md'
         markdown = request.form['markdown']
         action = request.form['action']
         
@@ -125,10 +133,10 @@ def new():
         else:
             if 'Draft' in action:
                 dest = 'drafts'
-                flash(MSG_POST_SAVED.format(filename))
+                flash(MSG_POST_SAVED.format(filename[:-3]))
             elif 'Publish' in action:
                 dest = 'publish'
-                flash(MSG_POST_PUBLISHED.format(filename))
+                flash(MSG_POST_PUBLISHED.format(filename[:-3]))
 
             with open(os.path.join(blog_dir, dest, filename),
                     'w', 'utf-8') as f:
@@ -212,10 +220,12 @@ def edit(filename):
             return render_template('edit_post.html', filename=filename,
                     markdown=markdown, action=action, past=past)
         else:
-            flash(MSG_POST_NOT_FOUND.format(filename))
+            flash(MSG_POST_NOT_FOUND.format(filename[:-3]))
             return redirect(url_for('posts'))
     elif request.method == 'POST':
         new_filename = request.form['filename']
+        if not new_filename.endswith('.md'):
+            new_filename += '.md'
         markdown = request.form['markdown']
         action = request.form['action']
 
@@ -240,7 +250,7 @@ def edit(filename):
                             os.path.join(blog_dir, location, filename),
                             os.path.join(blog_dir, location, new_filename)
                             )
-                flash(MSG_POST_SAVED.format(new_filename))
+                flash(MSG_POST_SAVED.format(new_filename[:-3]))
                 if 'Publish' in action:
                     bake_blog()
                 return redirect(url_for('posts'))
@@ -253,11 +263,11 @@ def remove(filename):
     location = get_location(filename)
     if location:
         hg_remove(os.path.join(blog_dir, location, filename))
-        flash(MSG_POST_REMOVED.format(filename))
+        flash(MSG_POST_REMOVED.format(filename[:-3]))
         if location == 'publish':
             bake_blog()
     else:
-        flash(MSG_POST_NOT_FOUND.format(filename))
+        flash(MSG_POST_NOT_FOUND.format(filename[:-3]))
     return redirect(url_for('posts'))
 
 @app.route('/move/<string:filename>')
@@ -268,15 +278,15 @@ def move(filename):
         new_location = get_location(filename, True)
         if new_location == 'drafts':
             dest = 'drafts'
-            flash(MSG_POST_DRAFTED.format(filename))
+            flash(MSG_POST_DRAFTED.format(filename[:-3]))
         else:
             dest = 'publish'
-            flash(MSG_POST_PUBLISHED.format(filename))
+            flash(MSG_POST_PUBLISHED.format(filename[:-3]))
         hg_move(os.path.join(blog_dir, location, filename),
                 os.path.join(blog_dir, new_location, filename), dest)
         bake_blog()
     else:
-        flash(MSG_POST_NOT_FOUND.format(filename))
+        flash(MSG_POST_NOT_FOUND.format(filename[:-3]))
     return redirect(url_for('posts'))
 
 @app.route('/bake/')
@@ -284,12 +294,6 @@ def move(filename):
 def republish():
     bake_blog()
     return redirect(url_for('settings'))
-
-def bake_blog():
-    try:
-        bake(blog_dir)
-    except ValueError:
-        flash(MSG_BAKE_FAILED)
 
 @app.route('/view/')
 @blog_required

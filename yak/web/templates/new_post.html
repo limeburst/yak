@@ -5,7 +5,7 @@
 <h2>New Post</h2>
 <form action="{{ url_for('new') }}" method="POST">
     <input type="hidden" name="referer" value="new_post.html">
-    <input type="text" name="filename" value="{{ filename }}">
+    <input type="text" name="filename" value="{{ filename[:-3] }}">
     <textarea name="markdown" rows="4">{{ markdown }}</textarea>
     <ul>
         <li><input type="submit" name="action" value="Save as Draft"></li>
