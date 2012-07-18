@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from codecs import open
 from datetime import datetime
@@ -307,7 +308,7 @@ def media():
         file = request.files['file']
         if file:
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            path = os.path.join(blog_dir, 'publish', filename)
             if not os.path.exists(path):
                 file.save(path)
                 flash(MSG_FILE_SAVED.format(file.filename))
@@ -322,7 +323,7 @@ def media():
 def send_media(filename):
     if filename in medialist():
         return send_file(os.path.abspath(
-            os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+            os.path.join(blog_dir, 'publish', filename)))
     else:
         flash(MSG_FILE_NOT_FOUND.format(filename))
         return redirect(url_for('media'))
@@ -350,3 +351,19 @@ def settings():
         g.blog = read_config(blog_dir)
         flash(MSG_SETTINGS_SAVED)
     return render_template('settings.html')
+
+@app.route('/export/')
+@blog_required
+def export():
+    filename = 'backup-{}'.format(datetime.strftime(datetime.now(), "%Y-%m-%d"))
+    backup = shutil.make_archive(filename, 'zip', blog_dir)
+    download = os.path.join(blog_dir, 'publish', os.path.basename(backup))
+    os.rename(backup, download)
+    return send_file(os.path.abspath(download))
+
+@app.route('/reset/')
+@blog_required
+def reset():
+    shutil.rmtree(blog_dir)
+    flash("Your blog has been reset.")
+    return redirect(url_for('init'))

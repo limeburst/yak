@@ -28,4 +28,8 @@
         <li><input type="submit" value="Save Settings" /></li>
     </ul>
 </form>
+<ul>
+    <li><a href="{{ url_for('export') }}">Export</a></li>
+    <li><a href="{{ url_for('reset') }}" class="remove">Reset</a></li>
+</ul>
 {% endblock %}

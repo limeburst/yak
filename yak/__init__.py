@@ -105,7 +105,6 @@ def manage(blog_dir, port):
     run_app({
         'PORT': port,
         'PATH': blog_dir,
-        'UPLOAD_FOLDER': os.path.join(blog_dir, 'publish'),
         'SECRET_KEY': 'not_so_secret',
         'DEBUG': True,
         })
