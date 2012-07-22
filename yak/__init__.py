@@ -106,7 +106,6 @@ def manage(blog_dir, port):
         'PORT': port,
         'PATH': blog_dir,
         'SECRET_KEY': 'not_so_secret',
-        'DEBUG': True,
         })
 
 def watch(blog_dir):
