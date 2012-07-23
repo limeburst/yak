@@ -58,11 +58,10 @@ def init(blog_dir, config=DEFAULT_CONFIG):
         os.makedirs(blog_dir)
     templates = ['base.html', 'index.html', 'post.html', 'archive.html',
             'atom.xml']
-    publishes = ['yak.jpg'] + DEFAULT_POSTS
     dirs = [
             ('drafts', []),
             ('static', ['style.css', 'favicon.ico']),
-            ('publish', publishes),
+            ('publish', []),
             ('templates', templates)
             ] 
     try:
