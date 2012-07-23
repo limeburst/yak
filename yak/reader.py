@@ -53,9 +53,11 @@ def is_valid_filename(filename):
         slug = filename[11:-3]
         if not slug:
             return False
+        if ' ' in slug:
+            return False
         try:
             slug.decode('ascii')
-        except UnicodeEncodeError:
+        except (UnicodeEncodeError, UnicodeDecodeError):
             return False
         return {'published': published, 'slug': slug}
     return False
