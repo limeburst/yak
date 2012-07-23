@@ -336,7 +336,7 @@ def remove_media(filename=None):
         flash(MSG_FILE_DELETED.format(filename))
     else:
         flash(MSG_FILE_NOT_FOUND.format(filename))
-    return render_template('media.html', medialist=medialist())
+    return redirect(url_for('media'))
 
 @app.route('/settings/', methods=['GET', 'POST'])
 @blog_required
