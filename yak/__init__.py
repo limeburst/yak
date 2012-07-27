@@ -56,14 +56,13 @@ class Post(object):
 def init(blog_dir, config=DEFAULT_CONFIG):
     if not os.path.exists(blog_dir):
         os.makedirs(blog_dir)
-    templates = ['base.html', 'index.html', 'post.html', 'archive.html',
-            'atom.xml']
     dirs = [
             ('drafts', []),
             ('static', ['style.css', 'favicon.ico']),
-            ('publish', []),
-            ('templates', templates)
-            ] 
+            ('publish', ['2012-07-20-yak.md']),
+            ('templates', ['base.html', 'index.html', 'post.html',
+                'archive.html', 'atom.xml']),
+            ]
     try:
         write_config(blog_dir, config)
         for dir in dirs:
