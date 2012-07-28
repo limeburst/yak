@@ -10,7 +10,13 @@
     </head>
     <body>
         <header>
-            <h1><a href="{{ self.relative() }}">{{ blog.TITLE }}</a></h1> by {{ blog.AUTHOR }}
+            <h1>
+                {% if self.relative() %}
+                <a href="{{ self.relative() }}">{{ blog.TITLE }}</a>
+                {% else %}
+                {{ blog.TITLE }}
+                {% endif %}
+            </h1> by {{ blog.AUTHOR }}
         </header>
         {%- block content -%}{%-  endblock -%}
         <footer>
