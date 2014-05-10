@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>The Making of Yak</title>
+        <link rel="alternate" type="application/atom+xml" href="./atom.xml" />
+        <link rel="stylesheet" type="text/css" href="./style.css" media="screen">
+        <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-28692211-1']);
+          _gaq.push(['_trackPageview']);
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="./">The Making of Yak</a></h1> by Jihyeok Seo
+        </div>
+        <a href="http://github.com/limeburst/yak"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub"></a>
+        <div id="main">
+            
+
+<article>
+    <header>
+    <h2><a href="2012/01/16/yak-0.1/">Yak 0.1</a></h2>
+    <time datetime="2012-01-16T00:00:00Z" pubdate="pubdate">January 16, 2012</time>
+    
+    </header>
+    <p>Today, I finally released Yak. It's been nearly two months since its inception. The combined coding time is probably under 24 hours, but thinking about the tiny details took the most of time. And it's hard to make time for programming, let alone sleep, in this bullshit country of mine.</p>
+<p>Anyway, <a href="http://pypi.python.org/pypi/Yak">it's on PyPI</a>, the Python package index. You can install Yak by running:</p>
+<pre><code>pip install yak
+</code></pre>
+<p>Yak is my first project in Python, and I had quite a fun time writing it. It's really a simple(and dirty) script if you look at the source code. I made using Yak as easy as possible, and the package includes a basic skeleton you can use right away. Included theme is the same as this blog.</p>
+<p>All the articles I wrote on this blog made its way to the details of Yak, and they're what makes this project so meaningful for me. The RSS feed of articles by others I read while building Yak are <a href="http://www.instapaper.com/folder/1425186/rss/1520049/PSxQy1C5vWL862ZFZlHHj4gGHI">here</a>. They also played a key part in this project.</p>
+<p>Special thanks to people at the <a href="http://langdev.org/">LangDev</a> IRC channel for the priceless discussions.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/15/the-making-of-yak/">The Making of Yak</a></h2>
+    <time datetime="2012-01-15T00:00:00Z" pubdate="pubdate">January 15, 2012</time>
+    
+    </header>
+    <p>I scraped all the pieces of thoughts in my brain and actual pieces of writing on notes and put them together, and here is 'The Making of Yak' blog!</p>
+<p>And guess what? This blog is powered by Yak! I'm planning to release it tomorrow =3</p>
+<p>The writings here may seem trivial, but they're nevertheless a valuable memory to me :)</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/09/implementation-details/">Implementation Details</a></h2>
+    <time datetime="2012-01-09T00:00:00Z" pubdate="pubdate">January 09, 2012</time>
+    
+    </header>
+    <p>Here you can read about the implementation details of Yak. I'm writing this to guide myself when writing Yak, and for all those who are interested. This article can be used as a manual for Yak.</p>
+<p>Basic philosophy: This blog, and Yak should minimize unnecessary work when writing blog posts.</p>
+<p>Users can start using Yak right away by running:</p>
+<pre><code>yak init
+</code></pre>
+<p>This will create all the necessary files needed by Yak to bake a blog. It is encouraged to run the command above first, and edit the files from there.</p>
+<p>You can get help by running:</p>
+<pre><code>yak --help
+</code></pre>
+<p>Yak will require three directories '_templates', '_posts', '_static', and the configuration file '_config.py' at the root of the blog directory.</p>
+<p>The configuration file '_config.py' is a simple Python script defining constants for Yak to use when baking the blog. Here is the config file used by this blog, the bare minimum:</p>
+<pre><code># -*- coding: utf-8 -*-
+BLOG_AUTHOR = u&quot;Jihyeok Seo&quot;
+BLOG_TITLE = u&quot;The Making of Yak&quot;
+BLOG_URL = u&quot;http://yak.limelog.net/&quot;
+BLOG_RIGHTS = u&quot;Copyright © 2011–2012 Jihyeok Seo.&quot;
+BLOG_SUBTITLE = u&quot;Just another yak shaving blog.&quot;
+</code></pre>
+<p>All the file under the '_static' directory will be copied to the root of the output directory. You sould put stylesheets and favicon.ico files here. Optionally .htaccess files.</p>
+<p>In the '_templates' directory, Yak will require four Jinja2 template files 'index.html' for the blog index page, 'post.html' for individual post pages, 'archive.html' for archive pages, and 'atom.xml' for the ATOM feed of the blog.</p>
+<p>All files in the '_post' directory ending with '.md' are treated as blog posts, and rendered as Markdown. Yak will look for them recursively so you can organize them whatever way you like as long as they're under the '_post' directory.</p>
+<p>The file name of posts must match the format 'YYYY-mm-dd-post-slug.md'. I set this restriction because they are going to make up the important permalinks.</p>
+<p>When refering to an image, the image link may be absolute(with the 'http' prefix), or relative to the post file. For an example, if you have the image file and the post file in the same directory, you can include images like this: <code>![Image](image.png)</code>.</p>
+<p>All metadata about the post documented below must be specified at the beginning of the post file. Time metadata is always interpreted as UTC.</p>
+<p>You can set post title by writing 'Title: Post Title'. If none is specified, the slug becomes the post title.</p>
+<p>You can write linked posts by writing 'Link: http://example.com/'.</p>
+<p>You can set published 'time' by writing 'Time: HH:MM:SS'. If none is specified, midnight will be used. Be sure to set this if you have two or most posts with the same date, if not, your ATOM feed will not validate, and the order in which the posts are shown may not be desirable. If you find doing this very annoying, sorry about that. File metadata the OS passes are not very reliable.</p>
+<p>You can set updated 'date' or 'time' by writing 'Updated: YY-mm-dd HH:MM:DD' or 'Updated: HH:MM:SS'. The updated date and time must be </p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/08/the-front-page/">The Front Page</a></h2>
+    <time datetime="2012-01-08T00:00:00Z" pubdate="pubdate">January 08, 2012</time>
+    
+    </header>
+    <p>What should be on the front page of a blog?</p>
+<ul>
+<li>The name of the author</li>
+<li>Recent posts</li>
+<li>Pagination?</li>
+<li>Link to archives</li>
+</ul>
+<p>Read my short thoughts on names <a href="http://yak.limelog.net/2011/12/05/names/">here</a>.</p>
+<p>Recent posts. But how recent? I think 20 is enough. Should we paginate? But how many people click on those tiny numbers? I never did. If the first 20 posts I see are good, that blog deserves to be in my feed list.</p>
+<p>Links to archives.  For how long of a time of posts should each archive keep? A month? A year? It depends on the writer, so I'll let them choose.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/07/feeds/">Feeds</a></h2>
+    <time datetime="2012-01-07T00:00:00Z" pubdate="pubdate">January 07, 2012</time>
+    
+    </header>
+    <p>Brent Simmons has a <a href="http://inessential.com/2011/06/15/what_we_talk_about_when_we_talk_about_rs">good article</a> on feeds.</p>
+<p>Now some boring stuff.</p>
+<p>There are two significant feed formats, ATOM and RSS. Until today, I thought RSS was better than ATOM as a format. Because to my eyes, it was the most commonly seen word. But looking at the specifications, it turned out that RSS sucks(as a format).</p>
+<p>So ATOM will be the default feed format for this project.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/06/why-another/">Why Another?</a></h2>
+    <time datetime="2012-01-06T00:00:00Z" pubdate="pubdate">January 06, 2012</time>
+    
+    </header>
+    <p>Tom Preston-Werner, the cofounder of GitHub, wrote <a href="https://github.com/mojombo/jekyll">Jekyll</a>, a blog-aware static site generator, for the whole GitHub community to use.</p>
+<p><a href="http://octopress.org/">Octopress</a> is another static blog generator based on Jekyll by Brandon Mathis.</p>
+<p>Brent Simmons, the author of <a href="http://inessential.com/">inessential.com</a>, uses his own static blog generator.</p>
+<p><a href="http://movabletype.org/">Movable Type</a>'s default mode is static.</p>
+<p>Yesterday, Marco Arment released his static blog generator <a href="https://github.com/marcoarment/secondcrack">Second Crack</a>.</p>
+<p>I bet there are bunch of other static blog generators out there. Hell, that's a lot of static generator for blogs. Why bother making another?</p>
+<p>Because none above fit my exact needs. And well, some programmers like yak shaving. </p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/05/markdown/">Markdown</a></h2>
+    <time datetime="2012-01-05T00:00:00Z" pubdate="pubdate">January 05, 2012</time>
+    
+    </header>
+    <p>WYSIWYG was a lie.</p>
+<ul>
+<li>You get much more than what you see. Unnecessarily generated markup that is longer than your writing.</li>
+<li>You lose all you see. Poor WYSIWYG editors sometimes screw up and decides to throw away all your writings.</li>
+<li>You totally get what you see. HTML-color for emphasis? Really?</li>
+</ul>
+<p>And to quote Brian Kernighan,</p>
+<blockquote>
+<p>The problem with ‘What You See Is What You Get’ is that what you see is all you’ve got.</p>
+</blockquote>
+<p>WYSIWYG may seem easy to use, but they are a mess. In my opinion, <a href="http://daringfireball.net/projects/markdown/">John Gruber's Markdown</a> is a much better solution for blogging. It adds semantics with minimum markup and mental load.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/04/page-titles/">Page Titles</a></h2>
+    <time datetime="2012-01-04T00:00:00Z" pubdate="pubdate">January 04, 2012</time>
+    
+    </header>
+    <p>Page titles are important because they convey the critical information of 'what this page is about' and 'what site this page belongs to'. I've looked at the page titles of a few blogs, and most of the sane ones fall into these formats;</p>
+<ul>
+<li>Blog Name » Page Title</li>
+<li>Blog Name: Post Title</li>
+<li>Post Title | Blog Name</li>
+<li>Post Title — Blog Name</li>
+</ul>
+<p>I've thought about exposure priority, decoration preferences, and some other things, but it turns out that there are <a href="http://en.wikipedia.org/wiki/Dash">proper uses for dashes</a>, especially the em dash.</p>
+<p>TL;DR;<br />
+Use the em dash, like this: Post Title — Blog Name</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/03/comments/">Comments</a></h2>
+    <time datetime="2012-01-03T00:00:00Z" pubdate="pubdate">January 03, 2012</time>
+    
+    </header>
+    <p>What social aspects are there of a blog? Well, since the rise of Facebook and all, 'social' has become somewhat like a buzzword. All human activity is social in some way. But hey, definition that you get right away is the best definition.</p>
+<p>So, we have comments as an obvious example. In my opinion, comments are unnecessary for blogs. For those people who comment on blogs, you should start a blog and get your own voice. Get a proper online identity, not a fragmented one.</p>
+<p>Because I'm writing a static blogging system, having an in-house commenting system means regenerating the whole website each time a comment is posted, which is a huge down for performance.</p>
+<p>If you must use commenting, using an external system such as DISQUS is much better.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/02/permalinks/">Permalinks</a></h2>
+    <time datetime="2012-01-02T00:00:00Z" pubdate="pubdate">January 02, 2012</time>
+    
+    </header>
+    <p>Permalinks are called premalinks because they are, or should be, permaneant. If something is going to be permanent on the web(well, everything on the web is), you want them to be meaningful and pretty.</p>
+<p>By meaningful, I mean permalinks should include a published date or some kind, and a slug. By pretty, I mean no unnecessary clutter. The following is my ideal permalink format for a blog post. (I chose to include the 'day' in the permalink, due to an implementation detail).</p>
+<p><a href="http://yak.limelog.net/2012/01/02/permalinks/">http://yak.limelog.net/2012/01/02/permalinks/</a></p>
+<p>That's much better than this:</p>
+<p><a href="http://blog.hona.kr/?p=201">http://blog.hona.kr/?p=201</a></p>
+<p>or this:</p>
+<p><a href="http://limelog.net/post/11091170754">http://limelog.net/post/11091170754</a></p>
+<p>They are also what guides people to your website. People should be able to expect what kind of content they will recieve just by looking at the URL. That's why I dislike the act of URL-shortening. You never know what you're going to get. If it needs to be shortened, then someone's doing their job wrong.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2012/01/01/readability/">Readability</a></h2>
+    <time datetime="2012-01-01T00:00:00Z" pubdate="pubdate">January 01, 2012</time>
+    
+    </header>
+    <p>For most blogs, people come to 'read'. They don't come to look at ads popping up here and there, <em>especially not</em> under their cursor, nor a full-screen terror.</p>
+<p>If you are one of theses ad abusers, stop right now. You have no respect for your readers, nor your site. There are plenty of other ways to do ads, and do them right.</p>
+<p>Again, people come to read. You don't want your lovely readers squinting at grey-on black texts or magnifying their viewport every time they visit your site.</p>
+<p>Other than content, you should make readability the top priority. Accessibility often comes together, as long as you follow web standards.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2011/12/05/names/">Names</a></h2>
+    <time datetime="2011-12-05T00:00:00Z" pubdate="pubdate">December 05, 2011</time>
+    
+    </header>
+    <p>To me, the author's name is important.</p>
+<p>To others, the presence of a name shows that the author is taking responsibilities, and people get a feeling of authencity from the writings.</p>
+<p>To the author himself, it is an oath to self, to be who one is, no more, no less. You <em>will</em> feel a sense of futility if you don't use your real name. Do not fear to be wrong. Nobody is right. Everyone is wrong.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2011/12/02/the-static-dream/">The Static Dream</a></h2>
+    <time datetime="2011-12-02T00:00:00Z" pubdate="pubdate">December 02, 2011</time>
+    
+    </header>
+    <p>When I was a little kid, I looked at the all-so-mighty Yahoo! and thought how the news headlines changed every time I hit refresh.</p>
+<blockquote>
+<p>Is there someone at Yahoo who updates the index HTML file every second?</p>
+</blockquote>
+<p>What a musing.</p>
+<p>Serving dynamic content like that must be really slow. It's ironic that the slowness is still the case these days.</p>
+<p>A blog doesn't need to be dynamic. Why not serve blog posts as static content? That way my writings won't end up in some cryptic database. Put those on a ramdisk and the bottleneck is the so-wide 100Mb/s home internet connection(in the case of Korea). Even better, with SSDs, we don't even need caching.</p>
+<p>So my blog will be static. I need a static blog generator. A blog baking engine.</p>
+</article>
+
+<article>
+    <header>
+    <h2><a href="2011/12/01/the-blogging-tool/">The Blogging Tool</a></h2>
+    <time datetime="2011-12-01T00:00:00Z" pubdate="pubdate">December 01, 2011</time>
+    
+    </header>
+    <p>Tools are tools. If you want to write on the web, the only important thing is really, your passion to write.</p>
+<p>But I, as a programmer, have never liked any of the blogging tools all the people are using. Wordpress is too heavy, I've seen too much of those blogs get fireballed. Tumblr is pretty but its permalinks are not, and there is too much downtime. etc etc etc.</p>
+<p>So I've resisted my desire to write just because there is no publishing platform I like. It's been like that for three years, and here I am, regretting, still wondering why there isn't this simple tool I need.</p>
+<p>That's it. Fuck waiting. I'm a goddamn programmer and I'll write my own.</p>
+</article>
+
+<div class="archive">
+    <h2>Archives</h2>
+    <ol>
+        <li><a href="2012/01/">Jan 2012</a></li><li><a href="2011/12/">Dec 2011</a></li>
+    </ol>
+</div>
+
+        </div>
+        <footer>
+            <p>Copyright © 2011–2012 Jihyeok Seo.</p>
+            <p>Site designed by <a href="http://limeburst.net/">LimeBurst</a>. Powered by <a href="http://yak.limelog.net/">Yak</a>.</p>
+        </footer>
+    </body>
+</html>

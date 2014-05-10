@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>Implementation Details &mdash; The Making of Yak</title>
+        <link rel="alternate" type="application/atom+xml" href="../../../../atom.xml" />
+        <link rel="stylesheet" type="text/css" href="../../../../style.css" media="screen">
+        <link href='http://fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-28692211-1']);
+          _gaq.push(['_trackPageview']);
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
+    </head>
+    <body>
+        <div id="header">
+            <h1><a href="../../../../">The Making of Yak</a></h1> by Jihyeok Seo
+        </div>
+        <a href="http://github.com/limeburst/yak"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub"></a>
+        <div id="main">
+            
+<article>
+    <header>
+
+    <h2><a href=".">Implementation Details</a></h2>
+    <time datetime="2012-01-09T00:00:00Z" pubdate="pubdate">January 09, 2012</time>
+
+    </header>
+    <p>Here you can read about the implementation details of Yak. I'm writing this to guide myself when writing Yak, and for all those who are interested. This article can be used as a manual for Yak.</p>
+<p>Basic philosophy: This blog, and Yak should minimize unnecessary work when writing blog posts.</p>
+<p>Users can start using Yak right away by running:</p>
+<pre><code>yak init
+</code></pre>
+<p>This will create all the necessary files needed by Yak to bake a blog. It is encouraged to run the command above first, and edit the files from there.</p>
+<p>You can get help by running:</p>
+<pre><code>yak --help
+</code></pre>
+<p>Yak will require three directories '_templates', '_posts', '_static', and the configuration file '_config.py' at the root of the blog directory.</p>
+<p>The configuration file '_config.py' is a simple Python script defining constants for Yak to use when baking the blog. Here is the config file used by this blog, the bare minimum:</p>
+<pre><code># -*- coding: utf-8 -*-
+BLOG_AUTHOR = u&quot;Jihyeok Seo&quot;
+BLOG_TITLE = u&quot;The Making of Yak&quot;
+BLOG_URL = u&quot;http://yak.limelog.net/&quot;
+BLOG_RIGHTS = u&quot;Copyright © 2011–2012 Jihyeok Seo.&quot;
+BLOG_SUBTITLE = u&quot;Just another yak shaving blog.&quot;
+</code></pre>
+
+<p>All the file under the '_static' directory will be copied to the root of the output directory. You sould put stylesheets and favicon.ico files here. Optionally .htaccess files.</p>
+<p>In the '_templates' directory, Yak will require four Jinja2 template files 'index.html' for the blog index page, 'post.html' for individual post pages, 'archive.html' for archive pages, and 'atom.xml' for the ATOM feed of the blog.</p>
+<p>All files in the '_post' directory ending with '.md' are treated as blog posts, and rendered as Markdown. Yak will look for them recursively so you can organize them whatever way you like as long as they're under the '_post' directory.</p>
+<p>The file name of posts must match the format 'YYYY-mm-dd-post-slug.md'. I set this restriction because they are going to make up the important permalinks.</p>
+<p>When refering to an image, the image link may be absolute(with the 'http' prefix), or relative to the post file. For an example, if you have the image file and the post file in the same directory, you can include images like this: <code>![Image](image.png)</code>.</p>
+<p>All metadata about the post documented below must be specified at the beginning of the post file. Time metadata is always interpreted as UTC.</p>
+<p>You can set post title by writing 'Title: Post Title'. If none is specified, the slug becomes the post title.</p>
+<p>You can write linked posts by writing 'Link: http://example.com/'.</p>
+<p>You can set published 'time' by writing 'Time: HH:MM:SS'. If none is specified, midnight will be used. Be sure to set this if you have two or most posts with the same date, if not, your ATOM feed will not validate, and the order in which the posts are shown may not be desirable. If you find doing this very annoying, sorry about that. File metadata the OS passes are not very reliable.</p>
+<p>You can set updated 'date' or 'time' by writing 'Updated: YY-mm-dd HH:MM:DD' or 'Updated: HH:MM:SS'. The updated date and time must be </p>
+</article>
+
+        </div>
+        <footer>
+            <p>Copyright © 2011–2012 Jihyeok Seo.</p>
+            <p>Site designed by <a href="http://limeburst.net/">LimeBurst</a>. Powered by <a href="http://yak.limelog.net/">Yak</a>.</p>
+        </footer>
+    </body>
+</html>
